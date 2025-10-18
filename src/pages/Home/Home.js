@@ -10,7 +10,7 @@ const Home = () => {
         { title: "Quản lý Khoa", desc: "Thông tin các khoa trong trường.", link: "/departments" },
         { title: "Quản lý Môn học", desc: "Thêm và chỉnh sửa thông tin môn học.", link: "/subjects" },
         { title: "Quản lý Điểm", desc: "Theo dõi và cập nhật điểm số sinh viên.", link: "/grades" },
-        { title: "Test", desc: "This is a test.", link: "/test" },
+        { title: "Quản lý Học phí", desc: "Theo dõi học phí của sinh viên.", link: "/tuition" },
     ];
 
     return (

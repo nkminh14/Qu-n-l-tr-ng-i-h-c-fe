@@ -14,6 +14,7 @@ const Navbar = () => {
                 <li><Link to="/departments">Khoa</Link></li>
                 <li><Link to="/subjects">Môn học</Link></li>
                 <li><Link to="/grades">Điểm</Link></li>
+                <li><Link to="/tuition">Học phí</Link></li>
             </ul>
             <div className="navbar-login">
                 <Link to="/login">Đăng nhập</Link>

@@ -10,6 +10,7 @@ import Classes from '../pages/Classes/Classes';
 import Departments from '../pages/Departments/Departments';
 import Subjects from '../pages/Subjects/Subjects';
 import Grades from '../pages/Grades/Grades';
+import Tuition from '../pages/Tuition/Tuition';
 
 const AppRoutes = () => {
     return (
@@ -23,6 +24,7 @@ const AppRoutes = () => {
                 <Route path="/departments" element={<Departments />} />
                 <Route path="/subjects" element={<Subjects />} />
                 <Route path="/grades" element={<Grades />} />
+                <Route path="/tuition" element={<Tuition />} />
             </Routes>
             <Footer />
         </Router>

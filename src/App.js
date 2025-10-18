@@ -1,8 +1,10 @@
 import React from "react";
+import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Home from "./pages/Home/Home";
+
 
 // Các trang tạm thời
 const Students = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Sinh viên</h2>;
@@ -12,6 +14,7 @@ const Departments = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đ�
 const Subjects = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Môn học</h2>;
 const Grades = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Điểm</h2>;
 const Login = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Trang đăng nhập</h2>;
+const Tuition = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Trang Học phí</h2>;
 
 function App() {
     return (
@@ -28,6 +31,7 @@ function App() {
                         <Route path="/subjects" element={<Subjects />} />
                         <Route path="/grades" element={<Grades />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/tuition" element={<Tuition />} />
                     </Routes>
                 </div>
                 <Footer />
