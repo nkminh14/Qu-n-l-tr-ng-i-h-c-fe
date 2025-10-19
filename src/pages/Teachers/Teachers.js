@@ -1,51 +1,110 @@
-import React, { useState, useMemo } from 'react';
-import './Teachers.css';
+import React, { useState, useMemo, useEffect } from "react";
+import "./Teachers.css";
 
-const mockTeachers = [
-    { id: 1, name: 'Nguyễn Văn A', academicRank: 'Giao sư', phone: '0123456789', email: 'ex@example.com', department: 'Toán học', experience: 10 },
-    { id: 2, name: 'Trần Thị B', academicRank: 'Phó giáo sư', phone: '0987654321', email: 'ex@example.com', department: 'Vật lý', experience: 8 },
-    { id: 3, name: 'Lê Văn C', academicRank: 'Tiến sĩ', phone: '0112233445', email: 'ex@example.com', department: 'Hóa học', experience: 5 },
-    { id: 4, name: 'Phạm Thị D', academicRank: 'Thạc sĩ', phone: '0223344556', email: 'ex@example.com', department: 'Sinh học', experience: 3 },
-    { id: 5, name: 'Hoàng Văn E', academicRank: 'Giao sư', phone: '0334455667', email: 'ex@example.com', department: 'Tin học', experience: 12 },
-    { id: 6, name: 'Vũ Thị F', academicRank: 'Phó giáo sư', phone: '0445566778', email: 'ex@example.com', department: 'Khoa học xã hội', experience: 7 },
-    { id: 7, name: 'Đỗ Văn G', academicRank: 'Tiến sĩ', phone: '0556677889', email: 'ex@example.com', department: 'Ngữ văn', experience: 9 },
-    { id: 8, name: 'Bùi Thị H', academicRank: 'Thạc sĩ', phone: '0667788990', email: 'ex@example.com', department: 'Lịch sử', experience: 4 },
-    { id: 9, name: 'Trịnh Văn I', academicRank: 'Giao sư', phone: '0778899001', email: 'ex@example.com', department: 'Địa lý', experience: 11 },
-    { id: 10, name: 'Lý Thị K', academicRank: 'Phó giáo sư', phone: '0889900112', email: 'ex@example.com', department: 'Ngoại ngữ', experience: 6 },
-    { id: 11, name: 'Phan Văn L', academicRank: 'Tiến sĩ', phone: '0990011223', email: ' ex@example.com', department: 'Giáo dục thể chất', experience: 15 },
-    { id: 12, name: 'Cao Thị M', academicRank: 'Thạc sĩ', phone: '1001122334', email: 'ex@example.com', department: 'Nghệ thuật', experience: 2 },
-    { id: 13, name: 'Đặng Văn N', academicRank: 'Giao sư', phone: '1112233445', email: 'ex@example.com', department: 'Công nghệ', experience: 13 },
-    { id: 14, name: 'Ngô Thị O', academicRank: 'Phó giáo sư', phone: '1223344556', email: 'ex@example.com', department: 'Kinh tế', experience: 14 },
-    { id: 15, name: 'Lâm Văn P', academicRank: 'Tiến sĩ', phone: '1334455667', email: 'ex@example.com', department: 'Quản trị kinh doanh', experience: 1 },
-    { id: 16, name: 'Tạ Thị Q', academicRank: 'Thạc sĩ', phone: '1445566778', email: 'ex@example.com', department: 'Luật', experience: 5 },
-];
+const TeacherModal = ({ teacher, onSave, onCancel }) => {
+    const [formData, setFormData] = useState(teacher || { name: "", academicRank: "", phoneNumber: "", email: "", experience: "", facultyId: "" });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        // Ensure experience and facultyId are numbers
+        setFormData({ ...formData, [name]: (name === "experience" || name === "facultyId") ? Number(value) : value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Basic validation
+        for (const key in formData) {
+            if (formData[key] === "" || formData[key] === null || formData[key] === undefined) {
+                alert("Vui lòng điền đầy đủ thông tin.");
+                return;
+            }
+        }
+        if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            alert("Email không hợp lệ.");
+            return;
+        }
+        if (!/^\d{10}$/.test(formData.phoneNumber)) {
+            alert("Số điện thoại không hợp lệ (yêu cầu 10 chữ số).");
+            return;
+        }
+        if (isNaN(formData.experience) || formData.experience < 0) {
+            alert("Kinh nghiệm phải là một số dương.");
+            return;
+        }
+        if (isNaN(formData.facultyId) || formData.facultyId <= 0) {
+            alert("ID Khoa phải là một số dương.");
+            return;
+        }
+        onSave(formData);
+    };
+
+    return (
+        <div className="modal">
+            <div className="modal-content">
+                <h2>{teacher ? "Chỉnh sửa Giảng viên" : "Thêm Giảng viên"}</h2>
+                <form onSubmit={handleSubmit}>
+                    <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Tên" />
+                    <input type="text" name="academicRank" value={formData.academicRank} onChange={handleChange} placeholder="Học hàm" />
+                    <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} placeholder="SĐT" />
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" />
+                    <input type="number" name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="ID Khoa" />
+                    <input type="number" name="experience" value={formData.experience} onChange={handleChange} placeholder="Kinh nghiệm (năm)" />
+                    <div className="modal-actions">
+                        <button type="submit">Lưu</button>
+                        <button type="button" onClick={onCancel}>Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 const Teachers = () => {
-    const [teachers, setTeachers] = useState(mockTeachers);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [teachers, setTeachers] = useState([]);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: "ascending" });
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingTeacher, setEditingTeacher] = useState(null);
+
     const itemsPerPage = 10;
-    const [searchQuery, setSearchQuery] = useState('');
+    const API_BASE_URL = "http://localhost:8081/api/teachers";
+
+    const fetchTeachers = async (query = "") => {
+        try {
+            const url = query ? `${API_BASE_URL}/search?${query}` : API_BASE_URL;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setTeachers(data);
+        } catch (error) {
+            console.error("Error fetching teachers:", error);
+            alert("Failed to fetch teachers. Please check the server connection.");
+        }
+    };
+
+    useEffect(() => {
+        fetchTeachers();
+    }, []);
 
     const sortedAndFilteredTeachers = useMemo(() => {
-        let filteredTeachers = teachers.filter(teacher =>
-            teacher.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            teacher.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            teacher.department.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        let filteredTeachers = [...teachers];
 
         if (sortConfig.key) {
             filteredTeachers.sort((a, b) => {
                 if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                    return sortConfig.direction === "ascending" ? -1 : 1;
                 }
                 if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                    return sortConfig.direction === "ascending" ? 1 : -1;
                 }
                 return 0;
             });
         }
         return filteredTeachers;
-    }, [teachers, searchQuery, sortConfig]);
+    }, [teachers, sortConfig]);
 
     const paginatedTeachers = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -55,40 +114,123 @@ const Teachers = () => {
     const totalPages = Math.ceil(sortedAndFilteredTeachers.length / itemsPerPage);
 
     const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
+        let direction = "ascending";
+        if (sortConfig.key === key && sortConfig.direction === "ascending") {
+            direction = "descending";
         }
         setSortConfig({ key, direction });
     };
 
-    const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
-        setCurrentPage(1); // Reset to first page on new search
+    const handleSearch = async (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        setCurrentPage(1);
+
+        // Construct query parameters for search
+        const params = new URLSearchParams();
+        if (value) {
+            // Assuming backend search can handle a single query parameter for name, email, or facultyId
+            // You might need to adjust this based on your backend's exact search implementation
+            params.append('name', value);
+            params.append('email', value);
+            params.append('facultyId', value);
+        }
+        await fetchTeachers(params.toString());
+    };
+
+    const handleAdd = () => {
+        setEditingTeacher(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (teacher) => {
+        setEditingTeacher(teacher);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (teacherId) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa giảng viên này?")) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${teacherId}`, {
+                    method: "DELETE",
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                fetchTeachers(); // Re-fetch teachers after deletion
+            } catch (error) {
+                console.error("Error deleting teacher:", error);
+                alert("Failed to delete teacher.");
+            }
+        }
+    };
+
+    const handleSave = async (teacherData) => {
+        try {
+            let response;
+            if (editingTeacher) {
+                // Update existing teacher
+                response = await fetch(`${API_BASE_URL}/${editingTeacher.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(teacherData),
+                });
+            } else {
+                // Add new teacher
+                response = await fetch(API_BASE_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(teacherData),
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            setIsModalOpen(false);
+            setEditingTeacher(null);
+            fetchTeachers(); // Re-fetch teachers after save
+        } catch (error) {
+            console.error("Error saving teacher:", error);
+            alert("Failed to save teacher.");
+        }
     };
 
     return (
         <div className="teachers-container">
             <h1>Quản lý Giảng viên</h1>
-            <div className='toolbar'>
+            <div className="toolbar">
                 <input
                     type="text"
-                    placeholder="Tìm kiếm theo Tên, Email, Khoa..."
+                    placeholder="Tìm kiếm theo Tên, Email, ID Khoa..."
                     value={searchQuery}
                     onChange={handleSearch}
-                    className='search-input'
+                    className="search-input"
                 />
+                <button onClick={handleAdd} className="add-btn">Thêm Giảng viên</button>
             </div>
+
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th onClick={() => requestSort('name')}>Tên {sortConfig.key === "name" && (sortConfig.direction === "ascending" ? "↑" : "↓")} </th>
+                        <th onClick={() => requestSort("name")}>
+                            Tên {sortConfig.key === "name" && (sortConfig.direction === "ascending" ? "↑" : "↓")}
+                        </th>
                         <th>Học hàm</th>
-                        <th>Số điện thoại</th>
+                        <th>SĐT</th>
                         <th>Email</th>
-                        <th>Khoa</th>
-                        <th onClick={() => requestSort("experience")}>Kinh nghiệm (năm) {sortConfig.key === "experience" && (sortConfig.direction === "ascending" ? "↑" : "↓")}</th>
+                        <th onClick={() => requestSort("facultyId")}>
+                            ID Khoa {sortConfig.key === "facultyId" && (sortConfig.direction === "ascending" ? "↑" : "↓")}
+                        </th>
+                        <th onClick={() => requestSort("experience")}>
+                            Kinh nghiệm {sortConfig.key === "experience" && (sortConfig.direction === "ascending" ? "↑" : "↓")}
+                        </th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,27 +239,41 @@ const Teachers = () => {
                             <td>{teacher.id}</td>
                             <td>{teacher.name}</td>
                             <td>{teacher.academicRank}</td>
-                            <td>{teacher.phone}</td>
+                            <td>{teacher.phoneNumber}</td>
                             <td>{teacher.email}</td>
-                            <td>{teacher.department}</td>
-                            <td>{teacher.experience}</td>
-                                <button className='edit-btn'>Sửa</button>
-                                <button className='delete-btn'>Xóa</button>
+                            <td>{teacher.facultyId}</td>
+                            <td>{teacher.experience} năm</td>
+                            <td>
+                                <button onClick={() => handleEdit(teacher)} className="edit-btn">Sửa</button>
+                                <button onClick={() => handleDelete(teacher.id)} className="delete-btn">Xóa</button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
             <div className="pagination">
-                {Array.from({ length: totalPages }, (_, i) => ( i + 1 )).map((page) => (
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={currentPage === page ? 'active' : ''}
-                    >{page}
+                        className={currentPage === page ? "active" : ""}
+                    >
+                        {page}
                     </button>
                 ))}
             </div>
+
+            {isModalOpen && (
+                <TeacherModal
+                    teacher={editingTeacher}
+                    onSave={handleSave}
+                    onCancel={() => {
+                        setIsModalOpen(false);
+                        setEditingTeacher(null);
+                    }}
+                />
+            )}
         </div>
     );
 };
