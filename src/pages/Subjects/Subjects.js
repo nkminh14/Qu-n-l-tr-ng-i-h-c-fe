@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+import Table from "../../components/Table/Table";
+
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
@@ -16,75 +18,57 @@ const Subjects = () => {
     }
   };
 
-  // sort theo TÊN MÔN (subjectName)
-  const handleSortByName = () => {
+  const handleSort = (key) => {
     const sorted = [...subjects].sort((a, b) => {
-      const an = (a.subjectName || "").toString();
-      const bn = (b.subjectName || "").toString();
-      return sortOrder === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+      const valA = a[key] || "";
+      const valB = b[key] || "";
+      if (sortOrder === "asc") {
+        return valA.toString().localeCompare(valB.toString());
+      } else {
+        return valB.toString().localeCompare(valA.toString());
+      }
     });
     setSubjects(sorted);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
+  const handleEdit = (subject) => {
+    console.log("Edit subject:", subject);
+    alert(`Sửa môn học: ${subject.subjectName}`);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
+      try {
+        await axios.delete(`http://localhost:8080/subjects/${id}`);
+        fetchSubjects();
+      } catch (error) {
+        console.error("Lỗi khi xóa môn học:", error);
+      }
+    }
+  };
+
+  const columns = [
+    { title: "ID", key: "subjectId" },
+    { title: "Tên môn", key: "subjectName", sortable: true },
+    { title: "Số tín chỉ", key: "credits" },
+    { title: "Mô tả", key: "description" },
+    { title: "Khoa", key: "facultyName" },
+  ];
+
   return (
     <div style={{ padding: "40px", textAlign: "center" }}>
       <h2>📘 Trang Quản lý Môn học</h2>
-
-      <div style={{ overflowX: "auto", marginTop: "30px" }}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>
-                Tên môn{" "}
-                <button onClick={handleSortByName} style={styles.sortButton}>
-                  {sortOrder === "asc" ? "↑" : "↓"}
-                </button>
-              </th>
-              <th>Số tín chỉ</th>
-              <th>Mô tả</th>
-              <th>Khoa</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subjects.length > 0 ? (
-              subjects.map((s, index) => (
-                <tr key={s.subjectId ?? index}>
-                  <td>{s.subjectId}</td>
-                  <td>{s.subjectName}</td>
-                  <td>{s.credits}</td>
-                  <td>{s.description}</td>
-                  <td>{s.facultyName ?? s.facultyId}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ padding: 20 }}>Không có dữ liệu môn học.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table
+        columns={columns}
+        data={subjects.map(s => ({...s, facultyName: s.facultyName ?? s.facultyId}))}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onSort={handleSort}
+        sortOrder={sortOrder}
+      />
     </div>
   );
-};
-
-// CSS nội tuyến giống Students.js
-const styles = {
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  sortButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontSize: 16,
-    marginLeft: 5,
-  },
 };
 
 export default Subjects;
