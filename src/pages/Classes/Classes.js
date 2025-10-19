@@ -13,7 +13,7 @@ const Classes = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("http://localhost:8081/classes");
+      const res = await axios.get("http://localhost:8080/classes");
       setClasses(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách lớp học:", err);
