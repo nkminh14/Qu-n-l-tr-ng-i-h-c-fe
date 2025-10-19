@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+import Table from "../../components/Table/Table";
+
 const Grades = () => {
     const [grades, setGrades] = useState([]);
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
@@ -25,18 +27,44 @@ const Grades = () => {
         }
     };
 
-    // Hàm sắp xếp theo mã sinh viên
-    const handleSortByStudent = () => {
+    const handleSort = (key) => {
         const sorted = [...grades].sort((a, b) => {
-            const an = (a?.studentCode || "").toString();
-            const bn = (b?.studentCode || "").toString();
-            return sortOrder === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+            const valA = a[key] || "";
+            const valB = b[key] || "";
+            if (sortOrder === "asc") {
+                return valA.toString().localeCompare(valB.toString());
+            } else {
+                return valB.toString().localeCompare(valA.toString());
+            }
         });
         setGrades(sorted);
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
+    const handleEdit = (grade) => {
+        console.log("Edit grade:", grade);
+        alert(`Sửa điểm cho sinh viên: ${grade.studentCode}`);
+    };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa điểm này không?")) {
+            try {
+                await axios.delete(`http://localhost:8080/grades/${id}`);
+                fetchGrades();
+            } catch (error) {
+                console.error("Lỗi khi xóa điểm:", error);
+            }
+        }
+    };
+
+    const columns = [
+        { title: "Mã điểm", key: "gradeId" },
+        { title: "Mã sinh viên", key: "studentCode", sortable: true },
+        { title: "Mã lớp", key: "classId" },
+        { title: "Điểm chuyên cần", key: "attendanceScore" },
+        { title: "Điểm giữa kỳ", key: "midtermScore" },
+        { title: "Điểm cuối kỳ", key: "finalScore" },
+    ];
 
     return (
         <div style={{ padding: "40px", textAlign: "center" }}>
@@ -45,65 +73,18 @@ const Grades = () => {
             {loading && <p style={{ marginTop: 16 }}>Đang tải...</p>}
             {error && <p style={{ marginTop: 16, color: "crimson" }}>{error}</p>}
 
-            <div style={{ overflowX: "auto", marginTop: 20 }}>
-                <table style={styles.table}>
-                    <thead>
-                    <tr>
-                        <th>Mã điểm</th>
-                        <th>
-                            Mã sinh viên{" "}
-                            <button onClick={handleSortByStudent} style={styles.sortButton}>
-                                {sortOrder === "asc" ? "↑" : "↓"}
-                            </button>
-                        </th>
-                        <th>Mã lớp</th>
-                        <th>Điểm chuyên cần</th>
-                        <th>Điểm giữa kỳ</th>
-                        <th>Điểm cuối kỳ</th>
-                        <th>Điểm trung bình</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {!loading && grades?.length > 0 ? (
-                        grades.map((g, index) => (
-                            <tr key={g.gradeId ?? index}>
-                                <td>{g.gradeId}</td>
-                                <td>{g.studentCode ?? "N/A"}</td>
-                                <td>{g.classId ?? "N/A"}</td>
-                                <td>{g.attendanceScore ?? "-"}</td>
-                                <td>{g.midtermScore ?? "-"}</td>
-                                <td>{g.finalScore ?? "-"}</td>
-
-                            </tr>
-                        ))
-                    ) : !loading ? (
-                        <tr>
-                            <td colSpan="7" style={{ padding: 20 }}>
-                                Không có dữ liệu điểm.
-                            </td>
-                        </tr>
-                    ) : null}
-                    </tbody>
-                </table>
-            </div>
+            {!loading && !error &&
+                <Table
+                    columns={columns}
+                    data={grades.map(g => ({...g, studentCode: g.studentCode ?? "N/A", classId: g.classId ?? "N/A", attendanceScore: g.attendanceScore ?? "-", midtermScore: g.midtermScore ?? "-", finalScore: g.finalScore ?? "-"}))}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onSort={handleSort}
+                    sortOrder={sortOrder}
+                />
+            }
         </div>
     );
-};
-
-const styles = {
-    table: {
-        width: "100%",
-        borderCollapse: "collapse",
-        backgroundColor: "#fff",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-    },
-    sortButton: {
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        fontSize: 16,
-        marginLeft: 5,
-    },
 };
 
 export default Grades;
