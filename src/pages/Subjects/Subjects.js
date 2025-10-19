@@ -9,7 +9,7 @@ const Subjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách môn học:", error);
