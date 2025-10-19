@@ -1,16 +1,18 @@
 import React from "react";
+import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Home from "./pages/Home/Home";
+import Students from "./pages/Students/Students";
+import Teachers from "./pages/Teachers/Teachers";
+import Classes from "./pages/Classes/Classes";
+import Departments from "./pages/Departments/Departments";
+import Subjects from "./pages/Subjects/Subjects";
+import Grades from "./pages/Grades/Grades";
+import Tuition from "./pages/Tuition/Tuition";
 
-// Các trang tạm thời
-const Students = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Sinh viên</h2>;
-const Teachers = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Giảng viên</h2>;
-const Classes = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Lớp</h2>;
-const Departments = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Khoa</h2>;
-const Subjects = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Môn học</h2>;
-const Grades = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Đây là trang Điểm</h2>;
+// Placeholder for Login page if it doesn't exist as a file
 const Login = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Trang đăng nhập</h2>;
 
 function App() {
@@ -28,6 +30,7 @@ function App() {
                         <Route path="/subjects" element={<Subjects />} />
                         <Route path="/grades" element={<Grades />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/tuition" element={<Tuition />} />
                     </Routes>
                 </div>
                 <Footer />
