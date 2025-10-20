@@ -4,9 +4,6 @@ import SubjectModal from "./SubjectModal";
 import Table from "../../components/Table/Table";
 import { Link } from "react-router-dom";
 
-const SUBJECT_API = "http://localhost:8081/subjects";
-const FACULTY_API = "http://localhost:8081/faculties";
-
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -14,6 +11,7 @@ const Subjects = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
 
+  // Gọi API lấy danh sách môn học và khoa
   useEffect(() => {
     fetchSubjects();
     fetchFaculties();
@@ -21,29 +19,29 @@ const Subjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get(SUBJECT_API);
-      setSubjects(res.data || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách môn học:", err);
+      const response = await axios.get("http://localhost:8081/subjects");
+      setSubjects(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách môn học:", error);
     }
   };
 
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get(FACULTY_API);
-      setFaculties(res.data || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách khoa:", err);
+      const response = await axios.get("http://localhost:8081/faculties");
+      setFaculties(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách khoa:", error);
     }
   };
 
   // Lấy tên khoa từ facultyId
   const getFacultyName = (facultyId) => {
-    const fac = faculties.find((f) => f.facultyId === facultyId);
-    return fac ? <Link to={`/faculties`}>{fac.facultyName}</Link> : "N/A";
+    const faculty = faculties.find((f) => f.facultyId === facultyId);
+    return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
   };
 
-  // Sắp xếp theo Tên môn
+  // Sắp xếp danh sách theo tên môn
   const handleSortByName = () => {
     const sorted = [...subjects].sort((a, b) => {
       const an = (a.subjectName || "").toString();
@@ -67,26 +65,28 @@ const Subjects = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
       try {
-        await axios.delete(`${SUBJECT_API}/${id}`);
+        await axios.delete(`http://localhost:8081/subjects/${id}`);
         fetchSubjects();
-      } catch (err) {
-        console.error("Lỗi khi xóa môn học:", err);
+      } catch (error) {
+        console.error("Lỗi khi xóa môn học:", error);
       }
     }
   };
 
   const handleSave = async (subjectData) => {
-    // subjectData nên gồm: { subjectName, credits, description, facultyId }
     try {
       if (editingSubject) {
-        await axios.put(`${SUBJECT_API}/${editingSubject.subjectId}`, subjectData);
+        await axios.put(
+          `http://localhost:8081/subjects/${editingSubject.subjectId}`,
+          subjectData
+        );
       } else {
-        await axios.post(SUBJECT_API, subjectData);
+        await axios.post("http://localhost:8081/subjects", subjectData);
       }
       fetchSubjects();
       setIsModalOpen(false);
-    } catch (err) {
-      console.error("Lỗi khi lưu môn học:", err);
+    } catch (error) {
+      console.error("Lỗi khi lưu môn học:", error);
     }
   };
 
@@ -98,8 +98,8 @@ const Subjects = () => {
     { title: "Khoa", key: "facultyId" },
   ];
 
-  // Thêm tên khoa vào bảng hiển thị
-  const dataWithFaculty = subjects.map((s) => ({
+  // Thêm tên khoa vào dữ liệu hiển thị
+  const subjectDataWithFaculty = subjects.map((s) => ({
     ...s,
     facultyId: getFacultyName(s.facultyId),
   }));
@@ -107,31 +107,29 @@ const Subjects = () => {
   return (
     <div style={{ padding: "40px", textAlign: "center" }}>
       <h2>📘 Trang Quản lý Môn học</h2>
-
       <button onClick={handleAdd} style={styles.addButton}>
         Thêm Môn học
       </button>
-
       <Table
         columns={columns}
-        data={dataWithFaculty}
+        data={subjectDataWithFaculty}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onSort={handleSortByName}
         sortOrder={sortOrder}
       />
-
       <SubjectModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         subject={editingSubject}
-        faculties={faculties} // giúp modal render dropdown chọn khoa
+        faculties={faculties} // để modal có dropdown chọn khoa
       />
     </div>
   );
 };
 
+// CSS (giống Students.js)
 const styles = {
   addButton: {
     backgroundColor: "#4CAF50",

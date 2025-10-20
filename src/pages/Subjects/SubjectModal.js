@@ -45,7 +45,6 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
 
     if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
 
-    // description: có thể để trống, không bắt buộc
     return newErrors;
     };
 
