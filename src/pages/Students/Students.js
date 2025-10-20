@@ -2,16 +2,19 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import StudentModal from "./StudentModal";
 import Table from "../../components/Table/Table";
+import { Link } from "react-router-dom";
 
 const Students = () => {
     const [students, setStudents] = useState([]);
+    const [faculties, setFaculties] = useState([]);
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
 
-    // Gọi API lấy danh sách sinh viên
+    // Gọi API lấy danh sách sinh viên và khoa
     useEffect(() => {
         fetchStudents();
+        fetchFaculties();
     }, []);
 
     const fetchStudents = async () => {
@@ -21,6 +24,21 @@ const Students = () => {
         } catch (error) {
             console.error("Lỗi khi lấy danh sách sinh viên:", error);
         }
+    };
+
+    const fetchFaculties = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/faculties");
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
+        }
+    };
+
+    // Lấy tên khoa từ facultyId
+    const getFacultyName = (facultyId) => {
+        const faculty = faculties.find((f) => f.facultyId === facultyId);
+        return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
     };
 
     // Sắp xếp danh sách theo tên
@@ -84,6 +102,12 @@ const Students = () => {
         { title: 'Email', key: 'email' },
     ];
 
+    // Thêm tên khoa vào dữ liệu sinh viên
+    const studentDataWithFaculty = students.map((student) => ({
+        ...student,
+        facultyId: getFacultyName(student.facultyId),
+    }));
+
     return (
         <div style={{ padding: '40px', textAlign: 'center' }}>
             <h2>📚 Trang Quản lý Sinh viên</h2>
@@ -92,7 +116,7 @@ const Students = () => {
             </button>
             <Table
                 columns={columns}
-                data={students}
+                data={studentDataWithFaculty}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onSort={handleSortByName}

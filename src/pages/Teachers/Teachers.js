@@ -16,7 +16,7 @@ const Teachers = () => {
 
     const fetchTeachers = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/teachers");
+            const response = await axios.get("http://localhost:8080/teachers");
             setTeachers(response.data);
         } catch (error) {
             console.error("Error fetching teachers:", error);
@@ -49,7 +49,7 @@ const Teachers = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this teacher?")) {
             try {
-                await axios.delete(`http://localhost:8080/api/teachers/${id}`);
+                await axios.delete(`http://localhost:8080/teachers/${id}`);
                 fetchTeachers();
             } catch (error) {
                 console.error("Error deleting teacher:", error);
@@ -60,9 +60,9 @@ const Teachers = () => {
     const handleSave = async (teacherData) => {
         try {
             if (editingTeacher) {
-                await axios.put(`http://localhost:8080/api/teachers/${editingTeacher.teacherId}`, teacherData);
+                await axios.put(`http://localhost:8080/teachers/${editingTeacher.teacherId}`, teacherData);
             } else {
-                await axios.post("http://localhost:8080/api/teachers", teacherData);
+                await axios.post("http://localhost:8080/teachers", teacherData);
             }
             fetchTeachers();
             setIsModalOpen(false);

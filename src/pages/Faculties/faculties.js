@@ -17,7 +17,7 @@ const Faculties = () => {
     const fetchFaculties = async () => {
         try {
             // Sửa lại endpoint API cho đúng
-            const response = await axios.get("http://localhost:8080/api/faculties");
+            const response = await axios.get("http://localhost:8080/faculties");
             setFaculties(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách khoa:", error);
@@ -51,7 +51,7 @@ const Faculties = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa khoa này không?")) {
             try {
-                await axios.delete(`http://localhost:8080/api/faculties/${id}`);
+                await axios.delete(`http://localhost:8080/faculties/${id}`);
                 fetchFaculties(); // Tải lại danh sách
             } catch (error) {
                 console.error("Lỗi khi xóa khoa:", error);
@@ -63,9 +63,9 @@ const Faculties = () => {
         try {
             if (editingFaculty) {
                 // Sửa endpoint và ID cho đúng với faculty
-                await axios.put(`http://localhost:8080/api/faculties/${editingFaculty.facultyId}`, facultyData);
+                await axios.put(`http://localhost:8080/faculties/${editingFaculty.facultyId}`, facultyData);
             } else {
-                await axios.post("http://localhost:8080/api/faculties", facultyData);
+                await axios.post("http://localhost:8080/faculties", facultyData);
             }
             fetchFaculties();
             setIsModalOpen(false);
