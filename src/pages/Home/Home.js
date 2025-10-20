@@ -7,7 +7,7 @@ const Home = () => {
         { title: "Quản lý Sinh viên", desc: "Thêm, sửa, xóa và xem thông tin sinh viên.", link: "/students" },
         { title: "Quản lý Giảng viên", desc: "Theo dõi danh sách và bộ môn của giảng viên.", link: "/teachers" },
         { title: "Quản lý Lớp học", desc: "Tổ chức lớp học và danh sách sinh viên.", link: "/classes" },
-        { title: "Quản lý Khoa", desc: "Thông tin các khoa trong trường.", link: "/departments" },
+        { title: "Quản lý Khoa", desc: "Thông tin các khoa trong trường.", link: "/faculties" },
         { title: "Quản lý Môn học", desc: "Thêm và chỉnh sửa thông tin môn học.", link: "/subjects" },
         { title: "Quản lý Điểm", desc: "Theo dõi và cập nhật điểm số sinh viên.", link: "/grades" },
         { title: "Quản lý Học phí", desc: "Theo dõi học phí của sinh viên.", link: "/tuition" },
