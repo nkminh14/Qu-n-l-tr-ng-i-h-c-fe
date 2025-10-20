@@ -29,7 +29,7 @@ const Table = ({ columns, data, onEdit, onDelete, onSort, sortOrder }) => {
                             ))}
                             <td className="actions-cell">
                                 <button onClick={() => onEdit(row)} className="action-button edit-button">Sửa</button>
-                                <button onClick={() => onDelete(row.studentId)} className="action-button delete-button">Xóa</button>
+                                <button onClick={() => onDelete(row[columns[0].key])} className="action-button delete-button">Xóa</button>
                             </td>
                         </tr>
                     ))
