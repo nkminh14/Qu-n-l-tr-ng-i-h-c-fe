@@ -1,0 +1,111 @@
+/* General styles for the table container */
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+/* Core table styles */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Table header styles */
+.custom-table thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.custom-table th {
+    padding: 16px;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* Sort button styles */
+.sort-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 8px;
+    color: #495057;
+    transition: color 0.2s;
+}
+
+.sort-button:hover {
+    color: #007bff;
+}
+
+/* Table body styles */
+.custom-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s;
+}
+
+.custom-table tbody tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+}
+
+.custom-table tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Table cell styles */
+.custom-table td {
+    padding: 16px;
+    color: #343a40;
+    vertical-align: middle;
+}
+
+/* Action buttons cell */
+.actions-cell {
+    display: flex;
+    gap: 10px;
+}
+
+/* Common button styles */
+.action-button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.action-button:hover {
+    opacity: 0.85;
+}
+
+/* Edit button style */
+.edit-button {
+    background-color: #007bff; /* Blue */
+}
+
+/* Delete button style */
+.delete-button {
+    background-color: #dc3545; /* Red */
+}
+
+/* No data message */
+.no-data-message {
+    padding: 40px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 18px;
+}
