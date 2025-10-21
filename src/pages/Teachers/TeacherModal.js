@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 
 const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
     const [formData, setFormData] = useState({
         name: '',
         academicRank: '',
-        experience: '',
         facultyId: '',
         phone: '',
         email: '',
@@ -19,7 +17,6 @@ const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
             setFormData({
                 name: '',
                 academicRank: '',
-                experience: '',
                 facultyId: '',
                 phone: '',
                 email: '',
@@ -35,16 +32,11 @@ const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
 
         if (!data.name) newErrors.name = "Tên không được để trống";
         if (!data.academicRank) newErrors.academicRank = "Học hàm không được để trống";
-        if (!data.experience) {
-            newErrors.experience = "Kinh nghiệm không được để trống";
-        } else if (isNaN(data.experience) || data.experience < 0) {
-            newErrors.experience = "Kinh nghiệm phải là một số không âm";
-        }
         if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
         if (!data.phone) {
             newErrors.phone = "Số điện thoại không được để trống";
-        } else if (!/^0\d{9}$/.test(data.phone)) {
-            newErrors.phone = "SĐT phải bắt đầu bằng 0 và có 10 chữ số";
+        } else if (!/^\d{10}$/.test(data.phone)) {
+            newErrors.phone = "Số điện thoại phải có 10 chữ số";
         }
         if (!data.email) {
             newErrors.email = "Email không được để trống";
@@ -89,23 +81,18 @@ const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
                     </div>
                     <div style={styles.formRow}>
                         <div style={styles.formField}>
-                            <label style={styles.label}>Kinh nghiệm</label>
-                            <input name="experience" value={formData.experience} onChange={handleChange} placeholder="Kinh nghiệm (năm)" style={styles.input} />
-                            {errors.experience && <p style={styles.error}>{errors.experience}</p>}
-                        </div>
-                        <div style={styles.formField}>
                             <label style={styles.label}>Khoa</label>
                             <input name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="Mã khoa" style={styles.input} />
                             {errors.facultyId && <p style={styles.error}>{errors.facultyId}</p>}
                         </div>
-                    </div>
-                    <div style={styles.formRow}>
                         <div style={styles.formField}>
                             <label style={styles.label}>SĐT</label>
                             <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Số điện thoại" style={styles.input} />
                             {errors.phone && <p style={styles.error}>{errors.phone}</p>}
                         </div>
-                        <div style={styles.formField}>
+                    </div>
+                    <div style={styles.formRow}>
+                        <div style={styles.formFieldFull}>
                             <label style={styles.label}>Email</label>
                             <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" style={styles.input} />
                             {errors.email && <p style={styles.error}>{errors.email}</p>}
@@ -148,12 +135,11 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         marginBottom: '15px',
-        gap: '20px',
     },
     formField: {
         display: 'flex',
         flexDirection: 'column',
-        width: '100%',
+        width: '48%',
     },
     formFieldFull: {
         display: 'flex',
@@ -201,7 +187,6 @@ const styles = {
         fontSize: '12px',
         marginTop: '5px',
         textAlign: 'left',
-        margin: 0,
     },
 };
 
