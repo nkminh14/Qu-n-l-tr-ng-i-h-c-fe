@@ -2,44 +2,66 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #e6f0ff;
-    padding: 12px 40px;
-    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-    font-family: Arial, sans-serif;
+    background-color: #003087; /* Dark blue background */
+    height: 70px; /* Fixed height */
+    padding: 0 40px; /* Increased right padding */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    font-family: 'Roboto', sans-serif;
+    color: white; /* White text for the navbar */
+    position: sticky; /* Make Navbar sticky */
+    top: 0;
+    z-index: 1000; /* Ensure Navbar is on top */
 }
 
-.navbar-logo {
-    font-size: 22px;
-    font-weight: bold;
-    color: #004aad;
-}
-
-.navbar-menu {
-    list-style: none;
+.navbar-left {
     display: flex;
-    gap: 20px;
+    align-items: center;
+    flex-grow: 1; /* Allow left section to grow */
 }
 
-.navbar-menu a {
-    text-decoration: none;
-    color: #004aad;
-    font-weight: 500;
-    transition: color 0.2s;
+.navbar-logo img {
+    height: 50px; /* Fixed height */
+    width: auto; /* Auto width to maintain aspect ratio */
+    margin-right: 20px;
 }
 
-.navbar-menu a:hover {
-    color: #007bff;
+.slogan-container {
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    width: 300px; /* Adjust width as needed */
 }
 
-.navbar-login a {
-    background-color: #007bff;
+.sliding-slogan {
+    display: inline-block;
+    padding-left: 100%; /* Start off-screen */
+    animation: slide-slogan 15s linear infinite;
+}
+
+@keyframes slide-slogan {
+    0%   { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between user icon and name */
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 15px; /* Add margin to push it further left */
+}
+
+.user-icon {
+    font-size: 24px; /* Size for the user icon */
     color: white;
-    padding: 6px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.2s;
 }
 
-.navbar-login a:hover {
-    background-color: #0056b3;
+.user-name {
+    color: white;
+    font-weight: 500;
 }

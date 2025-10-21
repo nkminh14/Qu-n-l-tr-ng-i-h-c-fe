@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TeacherModal from "./TeacherModal";
 import Table from "../../components/Table/Table";
+import { Link } from "react-router-dom";
 
 const Teachers = () => {
     const [teachers, setTeachers] = useState([]);
+    const [faculties, setFaculties] = useState([]);
+    const [sortColumn, setSortColumn] = useState("name");
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTeacher, setEditingTeacher] = useState(null);
@@ -12,6 +15,7 @@ const Teachers = () => {
     // Call API to get the list of teachers
     useEffect(() => {
         fetchTeachers();
+        fetchFaculties();
     }, []);
 
     const fetchTeachers = async () => {
@@ -23,17 +27,37 @@ const Teachers = () => {
         }
     };
 
-    // Sort the list by name
-    const handleSortByName = () => {
+    const fetchFaculties = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/faculties");
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
+        }
+    };
+
+    const getFacultyName = (facultyId) => {
+        const faculty = faculties.find((f) => f.facultyId === facultyId);
+        return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
+    };
+
+    const handleSort = (columnKey) => {
+        const isAsc = sortColumn === columnKey && sortOrder === "asc";
+        const newSortOrder = isAsc ? "desc" : "asc";
+        
         const sorted = [...teachers].sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.name.localeCompare(b.name);
-            } else {
-                return b.name.localeCompare(a.name);
+            if (a[columnKey] < b[columnKey]) {
+                return newSortOrder === "asc" ? -1 : 1;
             }
+            if (a[columnKey] > b[columnKey]) {
+                return newSortOrder === "asc" ? 1 : -1;
+            }
+            return 0;
         });
+
         setTeachers(sorted);
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        setSortOrder(newSortOrder);
+        setSortColumn(columnKey);
     };
 
     const handleAdd = () => {
@@ -75,10 +99,16 @@ const Teachers = () => {
         { title: 'ID', key: 'teacherId' },
         { title: 'Tên', key: 'name', sortable: true },
         { title: 'Học hàm', key: 'academicRank' },
+        { title: 'Kinh nghiệm', key: 'experience', sortable: true },
         { title: 'Khoa', key: 'facultyId' },
         { title: 'SĐT', key: 'phone' },
         { title: 'Email', key: 'email' },
     ];
+
+    const teacherDataWithFaculty = teachers.map((teacher) => ({
+        ...teacher,
+        facultyId: getFacultyName(teacher.facultyId),
+    }));
 
     return (
         <div style={{ padding: '40px', textAlign: 'center' }}>
@@ -88,11 +118,12 @@ const Teachers = () => {
             </button>
             <Table
                 columns={columns}
-                data={teachers}
+                data={teacherDataWithFaculty}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onSort={handleSortByName}
+                onSort={handleSort}
                 sortOrder={sortOrder}
+                sortColumn={sortColumn}
             />
             <TeacherModal
                 isOpen={isModalOpen}

@@ -1,0 +1,141 @@
+/* ====== Container chung ====== */
+.page-container {
+  padding: 40px;
+  text-align: center;
+}
+
+/* ====== Vùng bảng cuộn ====== */
+.table-scroll-container {
+  max-height: 500px;           /* Hiển thị nhiều dòng hơn trước khi cuộn */
+  overflow-y: auto;             /* Cuộn theo chiều dọc */
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: #fff;
+}
+
+/* ====== Thanh công cụ: tìm kiếm + lọc + nút thêm ====== */
+.search-pagination-controls {
+  display: flex;
+  justify-content: flex-start;  /* Căn trái các control */
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;                    /* Khoảng cách giữa các phần tử */
+}
+
+/* Loại tìm kiếm (select) */
+.search-type-select {
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  font-size: 1em;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+/* Ô nhập tìm kiếm với icon */
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 250px;             /* Chiều rộng gọn */
+}
+
+.search-input {
+  padding: 10px 10px 10px 35px; /* Chừa trái cho icon */
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  width: 100%;
+  font-size: 1em;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: #888;
+  font-size: 1.1em;
+}
+
+/* Nút thêm môn học */
+.add-button {
+  background-color: #2196f3;    /* Xanh primary */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.2s ease-in-out;
+  margin-left: auto;            /* Đẩy nút sang phải */
+}
+
+.add-button:hover {
+  background-color: #1976d2;    /* Xanh đậm khi hover */
+}
+
+/* ====== Phân trang ====== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.pagination button {
+  background-color: #f5f5f5;
+  color: #333333;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.pagination button:hover {
+  background-color: #e3f2fd;    /* Nền xanh nhạt khi hover */
+  color: #1976d2;               /* Chữ xanh đậm khi hover */
+}
+
+.pagination button.active {
+  background-color: #2196f3;    /* Xanh primary khi active */
+  color: white;
+  border-color: #2196f3;
+}
+
+/* ====== Tinh chỉnh bảng chung (tuỳ Table của bạn) ====== */
+.table-scroll-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-scroll-container th,
+.table-scroll-container td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.table-scroll-container thead th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
+  font-weight: 600;
+}
+
+/* ====== Responsive nhẹ ====== */
+@media (max-width: 768px) {
+  .search-pagination-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .add-button {
+    width: 100%;
+    margin-left: 0;
+  }
+  .search-input-wrapper {
+    max-width: 100%;
+    flex: 1;
+  }
+}
