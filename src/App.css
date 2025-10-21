@@ -1,45 +1,58 @@
-.app-container {
+.app-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* Sidebar width and main content area */
+  grid-template-rows: 70px 1fr; /* Navbar height and remaining height */
+  min-height: 100vh;
+}
+
+.navbar {
+  grid-column: 1 / -1; /* Navbar spans all columns */
+  grid-row: 1; /* Navbar in the first row */
+  z-index: 1000; /* Ensure Navbar is on top */
+}
+
+.sidebar {
+  grid-column: 1; /* Sidebar in the first column */
+  grid-row: 2 / -1; /* Sidebar starts from the second row and spans all remaining rows */
+  z-index: 900; /* Ensure Sidebar is above content */
+}
+
+.main-content-area {
+  grid-column: 2; /* Main content area in the second column */
+  grid-row: 2; /* Main content area in the second row */
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  overflow-y: auto; /* Enable scrolling for content if it overflows */
 }
 
 .main-content {
   flex: 1;
+  padding: 20px;
 }
 
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* General Typography and Container Styles for Modern Look */
+h1, h2, h3, h4, h5, h6 {
+  color: #003087; /* Dark blue for headings */
+  margin-bottom: 15px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+p {
+  line-height: 1.6;
+  margin-bottom: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+a {
+  color: #003087;
+  text-decoration: none;
 }
 
-.App-link {
-  color: #61dafb;
+a:hover {
+  text-decoration: underline;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.page-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }

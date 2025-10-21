@@ -4,7 +4,9 @@ html, body, #root {
 
 body {
     margin: 0;
-    background-color: #f4f9ff;
+    font-family: 'Roboto', 'Arial', sans-serif; /* Modern font */
+    background-color: #f5f5f5; /* Neutral light gray */
+    color: #333333; /* Dark gray text */
 }
 * {
     box-sizing: border-box;
