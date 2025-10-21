@@ -7,10 +7,11 @@ import Home from "./pages/Home/Home";
 import Students from "./pages/Students/Students";
 import Teachers from "./pages/Teachers/Teachers";
 import Classes from "./pages/Classes/Classes";
-import Departments from "./pages/Departments/Departments";
+import Faculties from "./pages/Faculties/faculties";
 import Subjects from "./pages/Subjects/Subjects";
 import Grades from "./pages/Grades/Grades";
 import Tuition from "./pages/Tuition/Tuition";
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Placeholder for Login page if it doesn't exist as a file
 const Login = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Trang đăng nhập</h2>;
@@ -26,7 +27,7 @@ function App() {
                         <Route path="/students" element={<Students />} />
                         <Route path="/teachers" element={<Teachers />} />
                         <Route path="/classes" element={<Classes />} />
-                        <Route path="/departments" element={<Departments />} />
+                        <Route path="/Faculties" element={<Faculties/>}/>
                         <Route path="/subjects" element={<Subjects />} />
                         <Route path="/grades" element={<Grades />} />
                         <Route path="/login" element={<Login />} />

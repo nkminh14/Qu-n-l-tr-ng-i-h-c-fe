@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import StudentModal from "./StudentModal";
+import Table from "../../components/Table/Table";
+import { Link } from "react-router-dom";
 
 const Students = () => {
     const [students, setStudents] = useState([]);
+    const [faculties, setFaculties] = useState([]);
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingStudent, setEditingStudent] = useState(null);
 
-    // Gọi API lấy danh sách sinh viên
+    // Gọi API lấy danh sách sinh viên và khoa
     useEffect(() => {
         fetchStudents();
+        fetchFaculties();
     }, []);
 
     const fetchStudents = async () => {
@@ -17,6 +24,21 @@ const Students = () => {
         } catch (error) {
             console.error("Lỗi khi lấy danh sách sinh viên:", error);
         }
+    };
+
+    const fetchFaculties = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/faculties");
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
+        }
+    };
+
+    // Lấy tên khoa từ facultyId
+    const getFacultyName = (facultyId) => {
+        const faculty = faculties.find((f) => f.facultyId === facultyId);
+        return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
     };
 
     // Sắp xếp danh sách theo tên
@@ -32,70 +54,95 @@ const Students = () => {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
+    const handleAdd = () => {
+        setEditingStudent(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (student) => {
+        setEditingStudent(student);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) {
+            try {
+                await axios.delete(`http://localhost:8080/students/${id}`);
+                fetchStudents();
+            } catch (error) {
+                console.error("Lỗi khi xóa sinh viên:", error);
+            }
+        }
+    };
+
+    const handleSave = async (studentData) => {
+        console.log("Saving student data:", studentData);
+        console.log("Editing student:", editingStudent);
+        try {
+            if (editingStudent) {
+                await axios.put(`http://localhost:8080/students/${editingStudent.studentId}`, studentData);
+            } else {
+                await axios.post("http://localhost:8080/students", studentData);
+            }
+            fetchStudents();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Lỗi khi lưu sinh viên:", error);
+        }
+    };
+
+    const columns = [
+        { title: 'ID', key: 'studentId' },
+        { title: 'MSSV', key: 'studentCode' },
+        { title: 'Tên', key: 'name', sortable: true },
+        { title: 'Ngày sinh', key: 'dateOfBirth' },
+        { title: 'Lớp', key: 'gradeId' },
+        { title: 'Khoa', key: 'facultyId' },
+        { title: 'SĐT', key: 'phone' },
+        { title: 'Email', key: 'email' },
+    ];
+
+    // Thêm tên khoa vào dữ liệu sinh viên
+    const studentDataWithFaculty = students.map((student) => ({
+        ...student,
+        facultyId: getFacultyName(student.facultyId),
+    }));
+
     return (
-        <div style={{ padding: "40px", textAlign: "center" }}>
+        <div style={{ padding: '40px', textAlign: 'center' }}>
             <h2>📚 Trang Quản lý Sinh viên</h2>
-            <div style={{ overflowX: "auto", marginTop: "30px" }}>
-                <table style={styles.table}>
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>MSSV</th>
-                        <th>
-                            Tên{" "}
-                            <button onClick={handleSortByName} style={styles.sortButton}>
-                                {sortOrder === "asc" ? "↑" : "↓"}
-                            </button>
-                        </th>
-                        <th>Ngày sinh</th>
-                        <th>Lớp</th>
-                        <th>Khoa</th>
-                        <th>SĐT</th>
-                        <th>Email</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {students.length > 0 ? (
-                        students.map((s, index) => (
-                            <tr key={s.studentId || index}>
-                                <td>{s.studentId}</td>
-                                <td>{s.studentCode}</td>
-                                <td>{s.name}</td>
-                                <td>{s.dateOfBirth}</td>
-                                <td>{s.gradeId}</td>
-                                <td>{s.facultyId}</td>
-                                <td>{s.phone}</td>
-                                <td>{s.email}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="8" style={{ padding: "20px" }}>
-                                Không có dữ liệu sinh viên.
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
-            </div>
+            <button onClick={handleAdd} style={styles.addButton}>
+                Thêm Sinh viên
+            </button>
+            <Table
+                columns={columns}
+                data={studentDataWithFaculty}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onSort={handleSortByName}
+                sortOrder={sortOrder}
+            />
+            <StudentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+                student={editingStudent}
+            />
         </div>
     );
 };
 
-// CSS nội tuyến
+// CSS for buttons can be kept or moved to a separate CSS file.
 const styles = {
-    table: {
-        width: "100%",
-        borderCollapse: "collapse",
-        backgroundColor: "#fff",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-    },
-    sortButton: {
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        fontSize: "16px",
-        marginLeft: "5px",
+    addButton: {
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '16px',
+        marginBottom: '20px',
     },
 };
 

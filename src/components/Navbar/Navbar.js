@@ -11,7 +11,7 @@ const Navbar = () => {
                 <li><Link to="/students">Sinh viên</Link></li>
                 <li><Link to="/teachers">Giảng viên</Link></li>
                 <li><Link to="/classes">Lớp</Link></li>
-                <li><Link to="/departments">Khoa</Link></li>
+                <li><Link to="/faculties">Khoa</Link></li>
                 <li><Link to="/subjects">Môn học</Link></li>
                 <li><Link to="/grades">Điểm</Link></li>
                 <li><Link to="/tuition">Học phí</Link></li>

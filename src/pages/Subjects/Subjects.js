@@ -1,22 +1,47 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SubjectModal from "./SubjectModal";
+import Table from "../../components/Table/Table";
+import { Link } from "react-router-dom";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
+  const [faculties, setFaculties] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(null);
 
-  useEffect(() => { fetchSubjects(); }, []);
+  // Gọi API lấy danh sách môn học và khoa
+  useEffect(() => {
+    fetchSubjects();
+    fetchFaculties();
+  }, []);
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
-      setSubjects(res.data || []);
+      const response = await axios.get("http://localhost:8081/subjects");
+      setSubjects(response.data || []);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách môn học:", error);
     }
   };
 
-  // sort theo TÊN MÔN (subjectName)
+  const fetchFaculties = async () => {
+    try {
+      const response = await axios.get("http://localhost:8081/faculties");
+      setFaculties(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách khoa:", error);
+    }
+  };
+
+  // Lấy tên khoa từ facultyId
+  const getFacultyName = (facultyId) => {
+    const faculty = faculties.find((f) => f.facultyId === facultyId);
+    return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
+  };
+
+  // Sắp xếp danh sách theo tên môn
   const handleSortByName = () => {
     const sorted = [...subjects].sort((a, b) => {
       const an = (a.subjectName || "").toString();
@@ -27,63 +52,94 @@ const Subjects = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
+  const handleAdd = () => {
+    setEditingSubject(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (subject) => {
+    setEditingSubject(subject);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
+      try {
+        await axios.delete(`http://localhost:8081/subjects/${id}`);
+        fetchSubjects();
+      } catch (error) {
+        console.error("Lỗi khi xóa môn học:", error);
+      }
+    }
+  };
+
+  const handleSave = async (subjectData) => {
+    try {
+      if (editingSubject) {
+        await axios.put(
+          `http://localhost:8081/subjects/${editingSubject.subjectId}`,
+          subjectData
+        );
+      } else {
+        await axios.post("http://localhost:8081/subjects", subjectData);
+      }
+      fetchSubjects();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Lỗi khi lưu môn học:", error);
+    }
+  };
+
+  const columns = [
+    { title: "ID", key: "subjectId" },
+    { title: "Tên môn", key: "subjectName", sortable: true },
+    { title: "Số tín chỉ", key: "credits" },
+    { title: "Mô tả", key: "description" },
+    { title: "Khoa", key: "facultyId" },
+  ];
+
+  // Thêm tên khoa vào dữ liệu hiển thị
+  const subjectDataWithFaculty = subjects.map((s) => ({
+    ...s,
+    facultyId: getFacultyName(s.facultyId),
+  }));
+
   return (
     <div style={{ padding: "40px", textAlign: "center" }}>
       <h2>📘 Trang Quản lý Môn học</h2>
-
-      <div style={{ overflowX: "auto", marginTop: "30px" }}>
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>
-                Tên môn{" "}
-                <button onClick={handleSortByName} style={styles.sortButton}>
-                  {sortOrder === "asc" ? "↑" : "↓"}
-                </button>
-              </th>
-              <th>Số tín chỉ</th>
-              <th>Mô tả</th>
-              <th>Khoa</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subjects.length > 0 ? (
-              subjects.map((s, index) => (
-                <tr key={s.subjectId ?? index}>
-                  <td>{s.subjectId}</td>
-                  <td>{s.subjectName}</td>
-                  <td>{s.credits}</td>
-                  <td>{s.description}</td>
-                  <td>{s.facultyName ?? s.facultyId}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ padding: 20 }}>Không có dữ liệu môn học.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <button onClick={handleAdd} style={styles.addButton}>
+        Thêm Môn học
+      </button>
+      <Table
+        columns={columns}
+        data={subjectDataWithFaculty}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onSort={handleSortByName}
+        sortOrder={sortOrder}
+      />
+      <SubjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        subject={editingSubject}
+        faculties={faculties} // để modal có dropdown chọn khoa
+      />
     </div>
   );
 };
 
-// CSS nội tuyến giống Students.js
+// CSS (giống Students.js)
 const styles = {
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    backgroundColor: "#fff",
-    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-  },
-  sortButton: {
-    background: "none",
+  addButton: {
+    backgroundColor: "#4CAF50",
+    color: "white",
+    padding: "10px 20px",
     border: "none",
+    borderRadius: "4px",
     cursor: "pointer",
-    fontSize: 16,
-    marginLeft: 5,
+    fontSize: "16px",
+    marginBottom: "20px",
   },
 };
 
