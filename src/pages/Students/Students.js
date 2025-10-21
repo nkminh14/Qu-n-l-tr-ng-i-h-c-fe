@@ -19,7 +19,7 @@ const Students = () => {
 
     const fetchStudents = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/students");
+            const response = await axios.get("http://localhost:8081/students");
             setStudents(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách sinh viên:", error);
@@ -28,7 +28,7 @@ const Students = () => {
 
     const fetchFaculties = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/faculties");
+            const response = await axios.get("http://localhost:8081/faculties");
             setFaculties(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách khoa:", error);
@@ -67,7 +67,7 @@ const Students = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) {
             try {
-                await axios.delete(`http://localhost:8080/students/${id}`);
+                await axios.delete(`http://localhost:8081/students/${id}`);
                 fetchStudents();
             } catch (error) {
                 console.error("Lỗi khi xóa sinh viên:", error);
@@ -80,9 +80,9 @@ const Students = () => {
         console.log("Editing student:", editingStudent);
         try {
             if (editingStudent) {
-                await axios.put(`http://localhost:8080/students/${editingStudent.studentId}`, studentData);
+                await axios.put(`http://localhost:8081/students/${editingStudent.studentId}`, studentData);
             } else {
-                await axios.post("http://localhost:8080/students", studentData);
+                await axios.post("http://localhost:8081/students", studentData);
             }
             fetchStudents();
             setIsModalOpen(false);
