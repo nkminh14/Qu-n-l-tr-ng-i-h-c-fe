@@ -96,6 +96,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
                             </select>
                             {errors.subjectId && <p style={styles.error}>{errors.subjectId}</p>}
                         </div>
+                        
                         <div style={styles.formField}>
                             <label style={styles.label}>Giảng viên</label>
                             <select name="teacherId" value={formData.teacherId} onChange={handleChange} style={styles.input}>
@@ -110,7 +111,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
                         </div>
                     </div>
                     <div style={styles.formRow}>
-                        <div style_={styles.formField}>
+                        <div style={styles.formField}>
                             <label style={styles.label}>Học kỳ</label>
                             <input name="semester" value={formData.semester} onChange={handleChange} placeholder="Học kỳ" style={styles.input} />
                             {errors.semester && <p style={styles.error}>{errors.semester}</p>}

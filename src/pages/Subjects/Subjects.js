@@ -7,7 +7,7 @@ import "./Subjects.css";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
-  const [faculties, setFaculties] = useState(null); 
+  const [faculties, setFaculties] = useState([]); 
   const [sortColumn, setSortColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc"); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,7 +26,7 @@ const Subjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách môn học:", err);
@@ -35,7 +35,7 @@ const Subjects = () => {
 
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/faculties");
+      const res = await axios.get("http://localhost:8080/faculties");
       setFaculties(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách khoa:", err);
@@ -89,7 +89,7 @@ const Subjects = () => {
 
     if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
       try {
-        await axios.delete(`http://localhost:8081/subjects/${id}`);
+        await axios.delete(`http://localhost:8080/subjects/${id}`);
         fetchSubjects();
       } catch (err) {
         console.error("Lỗi khi xóa môn học:", err);
@@ -101,11 +101,11 @@ const Subjects = () => {
     try {
       if (editingSubject) {
         await axios.put(
-          `http://localhost:8081/subjects/${editingSubject.subjectId}`,
+          `http://localhost:8080/subjects/${editingSubject.subjectId}`,
           subjectData
         );
       } else {
-        await axios.post("http://localhost:8081/subjects", subjectData);
+        await axios.post("http://localhost:8080/subjects", subjectData);
       }
       fetchSubjects();
       setIsModalOpen(false);

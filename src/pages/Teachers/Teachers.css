@@ -1,26 +1,87 @@
-.teachers-container {
-    padding: 20px;
+.page-container {
+    padding: 40px;
     text-align: center;
 }
 
-.toolbar {
+.search-pagination-controls {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: 20px;
 }
 
-.search-input {
-    width: 300px;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.add-btn {
+.search-input {
+    padding: 10px 10px 10px 35px; /* Adjust padding for icon */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 250px;
+    font-size: 16px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: #888;
+}
+
+.search-type-select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+.add-button {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 15px;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 16px;
+    margin-left: auto; /* Pushes the button to the right */
+}
+
+.table-scroll-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+    margin: 0 4px;
+    border-radius: 4px;
+}
+
+.pagination button.active {
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #4CAF50;
+}
+
+.pagination button:hover:not(.active) {
+    background-color: #ddd;
+}
+
+.pagination button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }

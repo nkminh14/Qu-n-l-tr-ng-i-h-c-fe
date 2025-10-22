@@ -130,9 +130,9 @@ const Classes = () => {
             onSort={handleSort}
             sortOrder={sortOrder}
         />
-      }
+      } 
       <ClassModal
-          isOpen={isModalOpen}
+          isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
           onSave={handleSave}
           classInfo={editingClass}
