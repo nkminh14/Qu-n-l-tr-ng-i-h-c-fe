@@ -1,6 +1,8 @@
 .footer {
-    background-color: #004aad;
-    color: white;
+    background-color: #003087; /* Dark blue background */
+    color: white; /* White text */
     text-align: center;
-    padding: 12px;
+    padding: 15px;
+    border-top: 1px solid #e0e0e0; /* Light border */
+    font-size: 0.9em;
 }

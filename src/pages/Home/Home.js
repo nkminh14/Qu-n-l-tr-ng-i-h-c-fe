@@ -14,9 +14,9 @@ const Home = () => {
     ];
 
     return (
-        <div className="home-container">
-            <div class="welcome-box">
-                <div class="welcome-section">
+        <div className="page-container">
+            <div className="welcome-box">
+                <div className="welcome-section">
                     <h1>Chào mừng đến với Website quản lý trường đại học</h1>
                     <p>Hệ thống giúp quản lý toàn diện thông tin sinh viên, giảng viên và các hoạt động học tập.</p>
                 </div>

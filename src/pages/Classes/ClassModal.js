@@ -36,7 +36,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
 
     const fetchSubjects = async () => {
         try {
-            const res = await axios.get("http://localhost:8081/subjects");
+            const res = await axios.get("http://localhost:8080/subjects");
             setSubjects(res.data || []);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách môn học:", error);
@@ -45,7 +45,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
 
     const fetchTeachers = async () => {
         try {
-            const response = await axios.get("http://localhost:8081/teachers");
+            const response = await axios.get("http://localhost:8080/teachers");
             setTeachers(response.data || []);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách giảng viên:", error);
@@ -96,7 +96,6 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
                             </select>
                             {errors.subjectId && <p style={styles.error}>{errors.subjectId}</p>}
                         </div>
-                        
                         <div style={styles.formField}>
                             <label style={styles.label}>Giảng viên</label>
                             <select name="teacherId" value={formData.teacherId} onChange={handleChange} style={styles.input}>
@@ -111,7 +110,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
                         </div>
                     </div>
                     <div style={styles.formRow}>
-                        <div style={styles.formField}>
+                        <div style_={styles.formField}>
                             <label style={styles.label}>Học kỳ</label>
                             <input name="semester" value={formData.semester} onChange={handleChange} placeholder="Học kỳ" style={styles.input} />
                             {errors.semester && <p style={styles.error}>{errors.semester}</p>}
@@ -153,8 +152,6 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000
-
     },
     modal: {
         backgroundColor: 'white',
