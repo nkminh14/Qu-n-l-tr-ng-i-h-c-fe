@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const StudentModal = ({ isOpen, onClose, onSave, student }) => {
     const [formData, setFormData] = useState({
@@ -10,23 +11,47 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
         phone: '',
         email: '',
     });
+    const [faculties, setFaculties] = useState([]);
+    const [grades, setGrades] = useState([]);
     const [errors, setErrors] = useState({});
 
-    useEffect(() => {
-        if (student) {
-            setFormData({ ...student }); // Create a copy
-        } else {
-            setFormData({
-                studentCode: '',
-                name: '',
-                dateOfBirth: '',
-                gradeId: '',
-                facultyId: '',
-                phone: '',
-                email: '',
-            });
+    const fetchFaculties = async () => {
+        try {
+            const res = await axios.get("http://localhost:8080/faculties");
+            setFaculties(res.data || []);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
         }
-        setErrors({});
+    };
+
+    const fetchGrades = async () => {
+        try {
+            const res = await axios.get("http://localhost:8080/grades"); // Assuming this endpoint exists
+            setGrades(res.data || []);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách lớp:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchFaculties(); // Call this when modal opens
+            fetchGrades(); // Call this when modal opens
+            if (student) {
+                setFormData({ ...student }); // Create a copy
+            } else {
+                setFormData({
+                    studentCode: '',
+                    name: '',
+                    dateOfBirth: '',
+                    gradeId: '',
+                    facultyId: '',
+                    phone: '',
+                    email: '',
+                });
+            }
+            setErrors({});
+        }
     }, [student, isOpen]);
 
     if (!isOpen) return null;
@@ -97,14 +122,28 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
                         </div>
                         <div style={styles.formField}>
                             <label style={styles.label}>Lớp</label>
-                            <input name="gradeId" value={formData.gradeId} onChange={handleChange} placeholder="Mã lớp" style={styles.input} />
+                            <select name="gradeId" value={formData.gradeId} onChange={handleChange} style={styles.input}>
+                                <option value="">Chọn lớp</option>
+                                {grades.map(grade => (
+                                    <option key={grade.gradeId} value={grade.gradeId}>
+                                        {grade.gradeName}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.gradeId && <p style={styles.error}>{errors.gradeId}</p>}
                         </div>
                     </div>
                     <div style={styles.formRow}>
                         <div style={styles.formField}>
                             <label style={styles.label}>Khoa</label>
-                            <input name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="Mã khoa" style={styles.input} />
+                            <select name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="Mã khoa" style={styles.input}>
+                                <option value="">Chọn khoa</option>
+                                {faculties.map(faculty => (
+                                    <option key={faculty.facultyId} value={faculty.facultyId}>
+                                        {faculty.facultyName}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.facultyId && <p style={styles.error}>{errors.facultyId}</p>}
                         </div>
                         <div style={styles.formField}>
@@ -141,6 +180,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1000
     },
     modal: {
         backgroundColor: 'white',

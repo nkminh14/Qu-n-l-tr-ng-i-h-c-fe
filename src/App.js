@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -12,40 +12,58 @@ import Faculties from "./pages/Faculties/faculties";
 import Subjects from "./pages/Subjects/Subjects";
 import Grades from "./pages/Grades/Grades";
 import Tuition from "./pages/Tuition/Tuition";
+import LoginModal from "./components/LoginModal/LoginModal"; // Import the modal
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-// Placeholder for Login page if it doesn't exist as a file
-const Login = () => <h2 style={{textAlign:'center', marginTop:'40px'}}>Trang đăng nhập</h2>;
-
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // State for login status
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
 
-    const handleLoginToggle = () => {
-        setIsLoggedIn(!isLoggedIn);
-        // In a real app, this would involve actual authentication logic
+    const handleLogin = (username, password) => {
+        // Hardcoded admin credentials
+        if (username === 'admin' && password === 'admin') {
+            setIsLoggedIn(true);
+            setShowLogin(false); // Close modal on successful login
+        } else {
+            alert('Tên đăng nhập hoặc mật khẩu không đúng!');
+        }
     };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+    };
+
+    const handleShowLogin = () => setShowLogin(true);
+    const handleCloseLogin = () => setShowLogin(false);
 
     return (
         <Router>
             <div className="app-layout">
-                <Navbar /> {/* Navbar spans full width at the top */}
-                <Sidebar isLoggedIn={isLoggedIn} onLoginToggle={handleLoginToggle} /> {/* Sidebar on the left */}
+                <Navbar isLoggedIn={isLoggedIn} />
+                <Sidebar isLoggedIn={isLoggedIn} onLogout={handleLogout} onShowLogin={handleShowLogin} />
                 <div className="main-content-area"> {/* Area for main content and footer */}
                     <div className="main-content">
                         <Routes>
                             <Route path="/" element={<Home />} />
-                            <Route path="/students" element={<Students />} />
-                            <Route path="/teachers" element={<Teachers />} />
-                            <Route path="/classes" element={<Classes />} />
-                            <Route path="/Faculties" element={<Faculties/>}/>
-                            <Route path="/subjects" element={<Subjects />} />
-                            <Route path="/grades" element={<Grades />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/tuition" element={<Tuition />} />
+                            {isLoggedIn ? (
+                                <>
+                                    <Route path="/students" element={<Students />} />
+                                    <Route path="/teachers" element={<Teachers />} />
+                                    <Route path="/classes" element={<Classes />} />
+                                    <Route path="/faculties" element={<Faculties />} />
+                                    <Route path="/subjects" element={<Subjects />} />
+                                    <Route path="/grades" element={<Grades />} />
+                                    <Route path="/tuition" element={<Tuition />} />
+                                </>
+                            ) : (
+                                // Redirect any other path to home if not logged in
+                                <Route path="*" element={<Navigate to="/" />} />
+                            )}
                         </Routes>
                     </div>
                     <Footer />
                 </div>
+                <LoginModal show={showLogin} handleClose={handleCloseLogin} handleLogin={handleLogin} />
             </div>
         </Router>
     );

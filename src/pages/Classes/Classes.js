@@ -223,34 +223,12 @@ const Classes = () => {
           sortColumn={sortColumn}
           sortOrder={sortOrder}
         />
-      </div>
-
-      <div className="pagination">
-        <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
-          Trước
-        </button>
-        {[...Array(totalPages)].map((_, i) => (
-          <button
-            key={i + 1}
-            onClick={() => paginate(i + 1)}
-            className={currentPage === i + 1 ? "active" : ""}
-          >
-            {i + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Tiếp
-        </button>
-      </div>
-
+      } 
       <ClassModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
-        classInfo={editingClass}
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave}
+          classInfo={editingClass}
       />
     </div>
   );

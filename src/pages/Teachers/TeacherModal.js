@@ -1,28 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
     const [formData, setFormData] = useState({
         name: '',
         academicRank: '',
+        experience: '',
         facultyId: '',
-        phone: '',
+        phoneNumber: '',
         email: '',
     });
+    const [faculties, setFaculties] = useState([]);
     const [errors, setErrors] = useState({});
 
-    useEffect(() => {
-        if (teacher) {
-            setFormData({ ...teacher });
-        } else {
-            setFormData({
-                name: '',
-                academicRank: '',
-                facultyId: '',
-                phone: '',
-                email: '',
-            });
+    const fetchFaculties = async () => {
+        try {
+            const res = await axios.get("http://localhost:8080/faculties");
+            setFaculties(res.data || []);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
         }
-        setErrors({});
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchFaculties(); // Call this when modal opens
+            if (teacher) {
+                setFormData({ ...teacher });
+            } else {
+                setFormData({
+                    name: '',
+                    academicRank: '',
+                    experience: '',
+                    facultyId: '',
+                    phoneNumber: '',
+                    email: '',
+                });
+            }
+            setErrors({});
+        }
     }, [teacher, isOpen]);
 
     if (!isOpen) return null;
@@ -32,11 +48,16 @@ const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
 
         if (!data.name) newErrors.name = "Tên không được để trống";
         if (!data.academicRank) newErrors.academicRank = "Học hàm không được để trống";
+        if (!data.experience) {
+            newErrors.experience = "Kinh nghiệm không được để trống";
+        } else if (isNaN(data.experience)) {
+            newErrors.experience = "Kinh nghiệm phải là một số";
+        }
         if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
-        if (!data.phone) {
-            newErrors.phone = "Số điện thoại không được để trống";
-        } else if (!/^\d{10}$/.test(data.phone)) {
-            newErrors.phone = "Số điện thoại phải có 10 chữ số";
+        if (!data.phoneNumber) {
+            newErrors.phoneNumber = "Số điện thoại không được để trống";
+        } else if (!/^\d{10}$/.test(data.phoneNumber)) {
+            newErrors.phoneNumber = "Số điện thoại phải có 10 chữ số";
         }
         if (!data.email) {
             newErrors.email = "Email không được để trống";
@@ -81,27 +102,40 @@ const TeacherModal = ({ isOpen, onClose, onSave, teacher }) => {
                     </div>
                     <div style={styles.formRow}>
                         <div style={styles.formField}>
-                            <label style={styles.label}>Khoa</label>
-                            <input name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="Mã khoa" style={styles.input} />
-                            {errors.facultyId && <p style={styles.error}>{errors.facultyId}</p>}
+                            <label style={styles.label}>Kinh nghiệm</label>
+                            <input name="experience" value={formData.experience} onChange={handleChange} placeholder="Kinh nghiệm" style={styles.input} type="number" />
+                            {errors.experience && <p style={styles.error}>{errors.experience}</p>}
                         </div>
                         <div style={styles.formField}>
                             <label style={styles.label}>SĐT</label>
-                            <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Số điện thoại" style={styles.input} />
-                            {errors.phone && <p style={styles.error}>{errors.phone}</p>}
+                            <input name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} placeholder="Số điện thoại" style={styles.input} />
+                            {errors.phoneNumber && <p style={styles.error}>{errors.phoneNumber}</p>}
                         </div>
                     </div>
                     <div style={styles.formRow}>
-                        <div style={styles.formFieldFull}>
+                        <div style={styles.formField}>
                             <label style={styles.label}>Email</label>
                             <input name="email" value={formData.email} onChange={handleChange} placeholder="Email" style={styles.input} />
                             {errors.email && <p style={styles.error}>{errors.email}</p>}
+                        </div>
+                        <div style={styles.formField}>
+                            <label style={styles.label}>Khoa</label>
+                            <select name="facultyId" value={formData.facultyId} onChange={handleChange} style={styles.input}>
+                                <option value="">Chọn khoa</option>
+                                {faculties.map(faculty => (
+                                    <option key={faculty.facultyId} value={faculty.facultyId}>
+                                        {faculty.facultyName}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.facultyId && <p style={styles.error}>{errors.facultyId}</p>}
                         </div>
                     </div>
                     <div style={styles.buttons}>
                         <button type="submit" style={styles.saveButton}>Lưu</button>
                         <button onClick={onClose} style={styles.cancelButton}>Hủy</button>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -119,6 +153,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1000, // Ensure modal is on top
     },
     modal: {
         backgroundColor: 'white',
