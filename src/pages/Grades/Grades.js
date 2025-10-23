@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import Table from "../../components/Table/Table";
+import GradeModal from "./GradeModal";
 
 const Grades = () => {
     const [grades, setGrades] = useState([]);
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingGrade, setEditingGrade] = useState(null);
 
     useEffect(() => {
         fetchGrades();
@@ -41,9 +44,14 @@ const Grades = () => {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
+    const handleAdd = () => {
+        setEditingGrade(null);
+        setIsModalOpen(true);
+    };
+
     const handleEdit = (grade) => {
-        console.log("Edit grade:", grade);
-        alert(`Sửa điểm cho sinh viên: ${grade.studentCode}`);
+        setEditingGrade(grade);
+        setIsModalOpen(true);
     };
 
     const handleDelete = async (id) => {
@@ -54,6 +62,20 @@ const Grades = () => {
             } catch (error) {
                 console.error("Lỗi khi xóa điểm:", error);
             }
+        }
+    };
+
+    const handleSave = async (gradeData) => {
+        try {
+            if (editingGrade) {
+                await axios.put(`http://localhost:8080/grades/${editingGrade.gradeId}`, gradeData);
+            } else {
+                await axios.post("http://localhost:8080/grades", gradeData);
+            }
+            fetchGrades();
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Lỗi khi lưu điểm:", error);
         }
     };
 
@@ -70,6 +92,10 @@ const Grades = () => {
         <div style={{ padding: "40px", textAlign: "center" }}>
             <h2>📊 Trang Quản lý Điểm Sinh viên</h2>
 
+            <button onClick={handleAdd} style={{ marginBottom: '20px', padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                Thêm Điểm
+            </button>
+
             {loading && <p style={{ marginTop: 16 }}>Đang tải...</p>}
             {error && <p style={{ marginTop: 16, color: "crimson" }}>{error}</p>}
 
@@ -83,6 +109,13 @@ const Grades = () => {
                     sortOrder={sortOrder}
                 />
             }
+
+            <GradeModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleSave}
+                grade={editingGrade}
+            />
         </div>
     );
 };
