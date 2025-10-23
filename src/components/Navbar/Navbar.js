@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.css";
 
-const Navbar = () => {
+const Navbar = ({ isLoggedIn }) => {
     return (
         <nav className="navbar">
             <div className="navbar-left">
@@ -16,7 +16,9 @@ const Navbar = () => {
             <div className="navbar-right">
                 <div className="user-info">
                     <span className="user-icon">👤</span> {/* User icon placeholder */}
-                    <span className="user-name">ADMIN</span>
+                    <span className="user-name">
+                        {isLoggedIn ? "Xin chào, Admin" : "Khách"}
+                    </span>
                 </div>
             </div>
         </nav>

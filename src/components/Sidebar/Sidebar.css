@@ -39,6 +39,16 @@
     background-color: rgba(255, 255, 255, 0.2); /* Lighter hover effect */
 }
 
+/* Styles for disabled links */
+.sidebar nav li.disabled-link a {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sidebar nav li.disabled-link a:hover {
+    background-color: transparent; /* No hover effect for disabled links */
+}
+
 .sidebar nav a .menu-icon {
     margin-right: 10px;
     font-size: 20px; /* Adjust icon size as needed */
