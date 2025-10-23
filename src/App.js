@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
@@ -19,10 +19,18 @@ function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
 
+    useEffect(() => {
+        const loggedInStatus = localStorage.getItem('isLoggedIn');
+        if (loggedInStatus === 'true') {
+            setIsLoggedIn(true);
+        }
+    }, []);
+
     const handleLogin = (username, password) => {
         // Hardcoded admin credentials
         if (username === 'admin' && password === 'admin') {
             setIsLoggedIn(true);
+            localStorage.setItem('isLoggedIn', 'true');
             setShowLogin(false); // Close modal on successful login
         } else {
             alert('Tên đăng nhập hoặc mật khẩu không đúng!');
@@ -31,6 +39,7 @@ function App() {
 
     const handleLogout = () => {
         setIsLoggedIn(false);
+        localStorage.removeItem('isLoggedIn');
     };
 
     const handleShowLogin = () => setShowLogin(true);
