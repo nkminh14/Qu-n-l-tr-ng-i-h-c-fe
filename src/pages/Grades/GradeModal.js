@@ -11,7 +11,8 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
     });
     const [students, setStudents] = useState([]);
     const [classes, setClasses] = useState([]);
-    const [subjects, setSubjects] = useState([]); // Add state for subjects
+    const [subjects, setSubjects] = useState([]);
+    const [filteredStudents, setFilteredStudents] = useState([]);
     const [errors, setErrors] = useState({});
 
     const fetchStudents = async () => {
@@ -32,7 +33,6 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
         }
     };
 
-    // Fetch subjects to display class names correctly
     const fetchSubjects = async () => {
         try {
             const res = await axios.get("http://localhost:8080/subjects");
@@ -46,7 +46,7 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
         if (isOpen) {
             fetchStudents();
             fetchClasses();
-            fetchSubjects(); // Fetch subjects when modal opens
+            fetchSubjects();
             if (grade) {
                 setFormData({ ...grade });
             } else {
@@ -62,9 +62,17 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
         }
     }, [grade, isOpen]);
 
+    useEffect(() => {
+        if (formData.classId) {
+            const filtered = students.filter(student => student.gradeId === formData.classId);
+            setFilteredStudents(filtered);
+        } else {
+            setFilteredStudents([]);
+        }
+    }, [formData.classId, students]);
+
     if (!isOpen) return null;
 
-    // Helper to get subject name from subjectId
     const getSubjectName = (subjectId) => {
         const subject = subjects.find((s) => s.subjectId === subjectId);
         return subject ? subject.subjectName : `ID: ${subjectId}`;
@@ -72,19 +80,23 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
 
     const validate = (data) => {
         const newErrors = {};
-
         if (!data.studentCode) newErrors.studentCode = "Mã sinh viên không được để trống";
         if (!data.classId) newErrors.classId = "Mã lớp không được để trống";
         if (data.attendanceScore < 0 || data.attendanceScore > 10) newErrors.attendanceScore = "Điểm chuyên cần phải từ 0 đến 10";
         if (data.midtermScore < 0 || data.midtermScore > 10) newErrors.midtermScore = "Điểm giữa kỳ phải từ 0 đến 10";
         if (data.finalScore < 0 || data.finalScore > 10) newErrors.finalScore = "Điểm cuối kỳ phải từ 0 đến 10";
-
         return newErrors;
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const newFormData = { ...formData, [name]: value };
+
+        if (name === 'classId') {
+            newFormData.studentCode = ''; // Reset student when class changes
+        }
+
+        setFormData(newFormData);
     };
 
     const handleSubmit = (e) => {
@@ -104,18 +116,6 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
                 <form onSubmit={handleSubmit} style={styles.form}>
                     <div style={styles.formRow}>
                         <div style={styles.formField}>
-                            <label style={styles.label}>Sinh viên</label>
-                            <select name="studentCode" value={formData.studentCode} onChange={handleChange} style={styles.input} disabled={!!grade}>
-                                <option value="">Chọn sinh viên</option>
-                                {students.map(student => (
-                                    <option key={student.studentCode} value={student.studentCode}>
-                                        {student.name} ({student.studentCode})
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.studentCode && <p style={styles.error}>{errors.studentCode}</p>}
-                        </div>
-                        <div style={styles.formField}>
                             <label style={styles.label}>Lớp</label>
                             <select name="classId" value={formData.classId} onChange={handleChange} style={styles.input}>
                                 <option value="">Chọn lớp</option>
@@ -126,6 +126,18 @@ const GradeModal = ({ isOpen, onClose, onSave, grade }) => {
                                 ))}
                             </select>
                             {errors.classId && <p style={styles.error}>{errors.classId}</p>}
+                        </div>
+                        <div style={styles.formField}>
+                            <label style={styles.label}>Sinh viên</label>
+                            <select name="studentCode" value={formData.studentCode} onChange={handleChange} style={styles.input} disabled={!formData.classId || !!grade}>
+                                <option value="">Chọn sinh viên</option>
+                                {filteredStudents.map(student => (
+                                    <option key={student.studentCode} value={student.studentCode}>
+                                        {student.name} ({student.studentCode})
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.studentCode && <p style={styles.error}>{errors.studentCode}</p>}
                         </div>
                     </div>
                     <div style={styles.formRow}>
