@@ -1,0 +1,126 @@
+/* ========== TABLE CONTAINER ========== */
+.table-scroll-container {
+    max-height: 500px; 
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+/* ========== SEARCH + PAGINATION CONTROLS ========== */
+.search-pagination-controls {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+/* Dropdown chọn loại tìm kiếm */
+.search-type-select {
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #ffffff;
+    cursor: pointer;
+}
+
+/* Wrapper của ô tìm kiếm */
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 250px;
+}
+
+/* Ô nhập tìm kiếm */
+.search-input {
+    padding: 10px 10px 10px 35px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    width: 100%;
+    font-size: 1em;
+}
+
+/* Icon kính lúp */
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: #888;
+    font-size: 1.1em;
+}
+
+/* ========== ADD BUTTON ========== */
+.add-button {
+    background-color: #4caf50; /* Xanh lá cho lớp học */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s ease-in-out;
+    margin-left: auto;
+}
+
+.add-button:hover {
+    background-color: #43a047; /* Xanh đậm khi hover */
+}
+
+/* ========== PAGINATION ========== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 5px;
+}
+
+.pagination button {
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.pagination button:hover {
+    background-color: #e8f5e9; /* Màu xanh nhạt khi hover */
+    color: #2e7d32; /* Xanh đậm khi hover */
+}
+
+.pagination button.active {
+    background-color: #4caf50; /* Màu chính */
+    color: white;
+    border-color: #4caf50;
+}
+
+/* ========== PAGE CONTAINER ========== */
+.page-container {
+    padding: 20px;
+    background-color: #fafafa;
+    border-radius: 8px;
+}
+
+.page-container h2 {
+    color: #2e7d32;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ========== SCROLLBAR STYLE ========== */
+.table-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+}
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
+}
