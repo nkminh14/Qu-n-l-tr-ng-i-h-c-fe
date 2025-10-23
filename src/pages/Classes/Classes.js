@@ -30,7 +30,7 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/classes");
+      const res = await axios.get("http://localhost:8080/classes");
       setClasses(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách lớp:", e);
@@ -39,7 +39,7 @@ const Classes = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/teachers");
+      const res = await axios.get("http://localhost:8080/teachers");
       setTeachers(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách giảng viên:", e);
@@ -48,7 +48,7 @@ const Classes = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách môn học:", e);
@@ -106,7 +106,7 @@ const Classes = () => {
     if (!id) return;
     if (window.confirm("Bạn có chắc muốn xoá lớp này?")) {
       try {
-        await axios.delete(`http://localhost:8081/classes/${id}`);
+        await axios.delete(`http://localhost:8080/classes/${id}`);
         fetchClasses();
       } catch (e) {
         console.error("Lỗi khi xoá lớp:", e);
@@ -118,11 +118,11 @@ const Classes = () => {
     try {
       if (editingClass) {
         await axios.put(
-          `http://localhost:8081/classes/${editingClass.classId}`,
+          `http://localhost:8080/classes/${editingClass.classId}`,
           classData
         );
       } else {
-        await axios.post("http://localhost:8081/classes", classData);
+        await axios.post("http://localhost:8080/classes", classData);
       }
       fetchClasses();
       setIsModalOpen(false);
@@ -178,59 +178,61 @@ const Classes = () => {
   }));
 
   return (
-    <div className="page-container">
-      <h2>🏫 Trang Quản lý Lớp học</h2>
+    <>
+      <div className="page-container">
+        <h2>🏫 Trang Quản lý Lớp học</h2>
 
-      <div className="search-pagination-controls">
-        <div className="search-input-wrapper">
-          <input
-            type="text"
-            placeholder={`Tìm theo ${
-              searchType === "subject" ? "Môn học" : searchType === "classId" ? "ID" : "Học kỳ"
-            }...`}
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="search-input"
-          />
-          <span className="search-icon">🔍</span>
+        <div className="search-pagination-controls">
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              placeholder={`Tìm theo ${
+                searchType === "subject" ? "Môn học" : searchType === "classId" ? "ID" : "Học kỳ"
+              }...`}
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="search-input"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="search-type-select"
+          >
+            <option value="subject">Tìm theo Môn học</option>
+            <option value="classId">Tìm theo ID</option>
+            <option value="semester">Tìm theo Học kỳ</option>
+          </select>
+
+          <button onClick={handleAdd} className="add-button">
+            Thêm Lớp học
+          </button>
         </div>
 
-        <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-          className="search-type-select"
-        >
-          <option value="subject">Tìm theo Môn học</option>
-          <option value="classId">Tìm theo ID</option>
-          <option value="semester">Tìm theo Học kỳ</option>
-        </select>
-
-        <button onClick={handleAdd} className="add-button">
-          Thêm Lớp học
-        </button>
+        <div className="table-scroll-container">
+          <Table
+            columns={columns}
+            data={dataForTable}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onSort={handleSort}
+            sortColumn={sortColumn}
+            sortOrder={sortOrder}
+          />
+        </div> 
       </div>
-
-      <div className="table-scroll-container">
-        <Table
-          columns={columns}
-          data={dataForTable}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onSort={handleSort}
-          sortColumn={sortColumn}
-          sortOrder={sortOrder}
-        />
-      } 
       <ClassModal
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
           onSave={handleSave}
           classInfo={editingClass}
       />
-    </div>
+    </>
   );
 };
 
