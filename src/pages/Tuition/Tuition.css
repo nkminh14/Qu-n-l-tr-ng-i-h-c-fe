@@ -1,0 +1,127 @@
+/* Based on Students.css styling to match your project */
+
+.page-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  max-width: 1100px;
+  margin: 20px auto;
+}
+
+.page-container h2 {
+  margin-bottom: 16px;
+}
+
+.search-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  width: 320px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 36px 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.search-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search-type-select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 14px;
+}
+
+.add-button {
+  margin-left: auto;
+  background-color: #1976d2;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.table-scroll-container {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+/* Table component may have its own styles; these are general fallbacks */
+.table-scroll-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-scroll-container th,
+.table-scroll-container td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.pagination {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Action buttons inside table (Edit/Delete) can be styled by your Table component,
+   but add some utility classes if needed */
+.btn-edit {
+  background: #4caf50;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-delete {
+  background: #f44336;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
