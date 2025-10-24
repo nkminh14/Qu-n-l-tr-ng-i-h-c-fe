@@ -1,111 +1,202 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import TuitionModel from "./TuitionModel";
 import Table from "../../components/Table/Table";
+import "./Tuition.css";
 
 const Tuition = () => {
-    const [tuitions, setTuitions] = useState([]);
-    const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
+  const [tuitions, setTuitions] = useState([]);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTuition, setEditingTuition] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchType, setSearchType] = useState("studentCode"); // 'studentCode' | 'semester'
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-    useEffect(() => {
+  useEffect(() => {
+    fetchTuitions();
+  }, []);
+
+  const fetchTuitions = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/tuitions");
+      setTuitions(res.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách học phí:", error);
+    }
+  };
+
+  const handleSort = (columnKey) => {
+    const isAsc = sortColumn === columnKey && sortOrder === "asc";
+    const newSortOrder = isAsc ? "desc" : "asc";
+    setSortColumn(columnKey);
+    setSortOrder(newSortOrder);
+
+    const sorted = [...tuitions].sort((a, b) => {
+      const aValue = a[columnKey];
+      const bValue = b[columnKey];
+
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return newSortOrder === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+      } else if (typeof aValue === "number" && typeof bValue === "number") {
+        return newSortOrder === "asc" ? aValue - bValue : bValue - aValue;
+      } else {
+        return 0;
+      }
+    });
+    setTuitions(sorted);
+  };
+
+  const handleAdd = () => {
+    setEditingTuition(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (t) => {
+    setEditingTuition(t);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bản ghi học phí này không?")) {
+      try {
+        await axios.delete(`http://localhost:8080/tuitions/${id}`);
         fetchTuitions();
-    }, []);
+      } catch (error) {
+        console.error("Lỗi khi xóa học phí:", error);
+      }
+    }
+  };
 
-    const fetchTuitions = async () => {
-        try {
-            setLoading(true);
-            setError("");
-            const res = await axios.get("http://localhost:8080/tuitions");
-            setTuitions(res.data || []);
-        } catch (err) {
-            console.error("Lỗi khi lấy danh sách học phí:", err);
-            setError("Không thể tải danh sách học phí.");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleSave = async (tuitionData) => {
+    try {
+      if (editingTuition) {
+        await axios.put(`http://localhost:8080/tuitions/${editingTuition.tuitionId}`, tuitionData);
+      } else {
+        await axios.post("http://localhost:8080/tuitions", tuitionData);
+      }
+      fetchTuitions();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Lỗi khi lưu học phí:", error);
+    }
+  };
 
-    const handleSort = (key) => {
-        const sorted = [...tuitions].sort((a, b) => {
-            const valA = a[key] || "";
-            const valB = b[key] || "";
-            if (sortOrder === "asc") {
-                return valA.toString().localeCompare(valB.toString());
-            } else {
-                return valB.toString().localeCompare(valA.toString());
-            }
-        });
-        setTuitions(sorted);
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    };
+  const columns = [
+    { title: "ID", key: "tuitionId" },
+    { title: "MSSV", key: "studentCode", sortable: true },
+    { title: "Học kỳ", key: "semester", sortable: true },
+    { title: "Số tiền", key: "amount"},
+    { title: "Ngày đóng", key: "paymentDate" },
+    { title: "Trạng thái", key: "status"}
+  ];
 
-    const handleEdit = (tuition) => {
-        console.log("Edit tuition:", tuition);
-        alert(`Sửa học phí cho sinh viên: ${tuition.studentCode}`);
-    };
+  // filter
+  const filtered = tuitions.filter(t => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return true;
+    if (searchType === "studentCode") {
+      return (t.studentCode || "").toLowerCase().includes(term);
+    } else if (searchType === "semester") {
+      return (t.semester || "").toLowerCase().includes(term);
+    }
+    return true;
+  });
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa học phí này không?")) {
-            try {
-                await axios.delete(`http://localhost:8080/tuitions/${id}`);
-                fetchTuitions();
-            } catch (error) {
-                console.error("Lỗi khi xóa học phí:", error);
-            }
-        }
-    };
+  // pagination
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-    const statusBadge = (status) => {
-        const color =
-            status === "PAID"
-                ? "#4caf50"
-                : status === "PARTIAL"
-                    ? "#ff9800"
-                    : "#f44336";
-        return (
-            <span style={{ backgroundColor: color, color: "#fff", padding: "4px 8px", borderRadius: 8 }}>
-        {status}
-      </span>
-        );
-    };
+  const paginate = (n) => {
+    if (n < 1) n = 1;
+    if (n > totalPages) n = totalPages;
+    setCurrentPage(n);
+  };
 
-    const columns = [
-        { title: "ID", key: "tuitionId" },
-        { title: "MSSV", key: "studentCode", sortable: true },
-        { title: "Học kỳ", key: "semester" },
-        { title: "Số tiền", key: "amount" },
-        { title: "Ngày đóng", key: "paymentDate" },
-        { title: "Trạng thái", key: "status" },
-        { title: "Sinh viên", key: "studentName" },
-    ];
+  // MSSV 
+  // const [studentsDropdown, setStudentsDropdown] = useState([]);
 
-    const data = tuitions.map(t => ({
-        ...t,
-        amount: t.amount?.toLocaleString("vi-VN") + " ₫",
-        status: statusBadge(t.status),
-        studentName: t.studentName ?? "—",
-    }));
+  // useEffect(() => {
+  //     fetchStudentsDropdown();
+  // }, []);
 
-    return (
-        <div style={{ padding: "40px", textAlign: "center" }}>
-            <h2>💰 Quản lý Học phí</h2>
+  // const fetchStudentsDropdown = async () => {
+  //     try {
+  //         const response = await axios.get("http://localhost:8080/students/dropdown");
+  //         setStudentsDropdown(response.data);
+  //     } catch (error) {
+  //         console.error("Lỗi lấy Dropdown MSSV:", error);
+  //     }
+  // };
 
-            {loading && <p style={{ marginTop: 16 }}>Đang tải...</p>}
-            {error && <p style={{ marginTop: 16, color: "crimson" }}>{error}</p>}
+  return (
+    <div className="page-container">
+      <h2>💸 Trang Quản lý Học phí</h2>
 
-            {!loading && !error &&
-                <Table
-                    columns={columns}
-                    data={data}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onSort={handleSort}
-                    sortOrder={sortOrder}
-                />
-            }
+      <div className="search-pagination-controls">
+        <div className="search-input-wrapper">
+          <input
+            type="text"
+            placeholder={`Tìm kiếm theo ${searchType === "studentCode" ? "MSSV" : "Học kỳ"}...`}
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+            className="search-input"
+          />
+          <span className="search-icon">🔍</span>
         </div>
-    );
+
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          className="search-type-select"
+        >
+          <option value="studentCode">Tìm theo MSSV</option>
+          <option value="semester">Tìm theo Học kỳ</option>
+        </select>
+
+        <button onClick={handleAdd} className="add-button">Thêm Học phí</button>
+      </div>
+
+      <div className="table-scroll-container">
+        <Table
+          columns={columns}
+          data={currentItems}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onSort={handleSort}
+          sortColumn={sortColumn}
+          sortOrder={sortOrder}
+        />
+      </div>
+
+      <div className="pagination">
+        <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>Trước</button>
+        {[...Array(totalPages)].map((_, idx) => (
+          <button
+            key={idx + 1}
+            onClick={() => paginate(idx + 1)}
+            className={currentPage === idx + 1 ? "active" : ""}
+          >
+            {idx + 1}
+          </button>
+        ))}
+        <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>Tiếp</button>
+      </div>
+
+      <TuitionModel
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        tuition={editingTuition}
+        // studentsDropdown={studentsDropdown}
+      />
+
+    </div>
+  );
 };
 
 export default Tuition;
