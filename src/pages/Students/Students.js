@@ -8,6 +8,7 @@ import "./Students.css"; // Import Students.css
 const Students = () => {
     const [students, setStudents] = useState([]);
     const [faculties, setFaculties] = useState(null); // Initialize as null to check if fetched
+    const [classes, setClasses] = useState(null); // Initialize as null to check if fetched
     const [sortColumn, setSortColumn] = useState(null); // State for current sorted column
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +22,7 @@ const Students = () => {
     useEffect(() => {
         fetchStudents();
         fetchFaculties();
+        fetchClasses();
     }, []);
 
     const fetchStudents = async () => {
@@ -41,11 +43,27 @@ const Students = () => {
         }
     };
 
+    const fetchClasses = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/classes");
+            setClasses(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách lớp:", error);
+        }
+    };
+
     // Lấy tên khoa từ facultyId
     const getFacultyName = (facultyId) => {
         if (!faculties) return "Loading..."; // Handle loading state for faculties
         const faculty = faculties.find((f) => f.facultyId === facultyId);
         return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
+    };
+
+    // Lấy tên lớp từ classId
+    const getClassName = (classId) => {
+        if (!classes) return "Loading..."; // Handle loading state for classes
+        const a_class = classes.find((c) => c.classId === classId);
+        return a_class ? <Link to={`/classes`}>{a_class.subjectName}</Link> : "N/A";
     };
 
     // Sắp xếp danh sách
@@ -113,7 +131,7 @@ const Students = () => {
         { title: 'MSSV', key: 'studentCode', sortable: true },
         { title: 'Tên', key: 'name', sortable: true },
         { title: 'Ngày sinh', key: 'dateOfBirth' },
-        { title: 'Lớp', key: 'gradeId' },
+        { title: 'Lớp', key: 'classId' },
         { title: 'Khoa', key: 'facultyId' },
         { title: 'SĐT', key: 'phone' },
         { title: 'Email', key: 'email' },
@@ -128,12 +146,13 @@ const Students = () => {
             case 'name':
                 return student.name.toLowerCase().includes(lowerCaseSearchTerm);
             case 'gradeId':
-                return student.gradeId.toLowerCase().includes(lowerCaseSearchTerm);
+                return student.classId.toString().toLowerCase().includes(lowerCaseSearchTerm);
             default:
                 return (
                     student.name.toLowerCase().includes(lowerCaseSearchTerm) ||
                     student.studentCode.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    (faculties && getFacultyName(student.facultyId).props && getFacultyName(student.facultyId).props.children.toLowerCase().includes(lowerCaseSearchTerm))
+                    (faculties && getFacultyName(student.facultyId).props && getFacultyName(student.facultyId).props.children.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                    (classes && getClassName(student.classId).props && getClassName(student.classId).props.children.toLowerCase().includes(lowerCaseSearchTerm))
                 );
         }
     });
@@ -149,10 +168,11 @@ const Students = () => {
     // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Thêm tên khoa vào dữ liệu sinh viên
-    const studentDataWithFaculty = currentStudents.map((student) => ({
+    // Thêm tên khoa và lớp vào dữ liệu sinh viên
+    const studentDataWithDetails = currentStudents.map((student) => ({
         ...student,
         facultyId: getFacultyName(student.facultyId),
+        classId: getClassName(student.classId),
     }));
 
     return (
@@ -190,7 +210,7 @@ const Students = () => {
             <div className="table-scroll-container">
                 <Table
                     columns={columns}
-                    data={studentDataWithFaculty}
+                    data={studentDataWithDetails}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onSort={handleSort}
@@ -218,6 +238,8 @@ const Students = () => {
                 onClose={() => setIsModalOpen(false)}
                 onSave={handleSave}
                 student={editingStudent}
+                faculties={faculties}
+                classes={classes}
             />
         </div>
     );

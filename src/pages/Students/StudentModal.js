@@ -1,42 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const StudentModal = ({ isOpen, onClose, onSave, student }) => {
+const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) => {
     const [formData, setFormData] = useState({
         studentCode: '',
         name: '',
         dateOfBirth: '',
-        gradeId: '',
+        classId: '',
         facultyId: '',
         phone: '',
         email: '',
     });
-    const [faculties, setFaculties] = useState([]);
-    const [grades, setGrades] = useState([]);
     const [errors, setErrors] = useState({});
-
-    const fetchFaculties = async () => {
-        try {
-            const res = await axios.get("http://localhost:8080/faculties");
-            setFaculties(res.data || []);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách khoa:", error);
-        }
-    };
-
-    const fetchGrades = async () => {
-        try {
-            const res = await axios.get("http://localhost:8080/grades"); // Assuming this endpoint exists
-            setGrades(res.data || []);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách lớp:", error);
-        }
-    };
 
     useEffect(() => {
         if (isOpen) {
-            fetchFaculties(); // Call this when modal opens
-            fetchGrades(); // Call this when modal opens
             if (student) {
                 setFormData({ ...student }); // Create a copy
             } else {
@@ -44,7 +22,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
                     studentCode: '',
                     name: '',
                     dateOfBirth: '',
-                    gradeId: '',
+                    classId: '',
                     facultyId: '',
                     phone: '',
                     email: '',
@@ -66,7 +44,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
         } else if (!/^\d{4}-\d{2}-\d{2}$/.test(data.dateOfBirth)) {
             newErrors.dateOfBirth = "Định dạng ngày sinh là YYYY-MM-DD";
         }
-        if (!data.gradeId) newErrors.gradeId = "Lớp không được để trống";
+        if (!data.classId) newErrors.classId = "Lớp không được để trống";
         if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
         if (!data.phone) {
             newErrors.phone = "Số điện thoại không được để trống";
@@ -122,15 +100,15 @@ const StudentModal = ({ isOpen, onClose, onSave, student }) => {
                         </div>
                         <div style={styles.formField}>
                             <label style={styles.label}>Lớp</label>
-                            <select name="gradeId" value={formData.gradeId} onChange={handleChange} style={styles.input}>
+                            <select name="classId" value={formData.classId} onChange={handleChange} style={styles.input}>
                                 <option value="">Chọn lớp</option>
-                                {grades.map(grade => (
-                                    <option key={grade.gradeId} value={grade.gradeId}>
-                                        {grade.gradeName}
+                                {classes && classes.map(a_class => (
+                                    <option key={a_class.classId} value={a_class.classId}>
+                                        {a_class.subjectName}
                                     </option>
                                 ))}
                             </select>
-                            {errors.gradeId && <p style={styles.error}>{errors.gradeId}</p>}
+                            {errors.classId && <p style={styles.error}>{errors.classId}</p>}
                         </div>
                     </div>
                     <div style={styles.formRow}>

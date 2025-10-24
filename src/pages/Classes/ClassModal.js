@@ -54,7 +54,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get('http://localhost:8081/subjects');
+      const res = await axios.get('http://localhost:8080/subjects');
       setSubjects(res.data || []);
     } catch (e) {
       console.error('Lỗi khi lấy danh sách môn học:', e);
@@ -63,7 +63,7 @@ const ClassModal = ({ isOpen, onClose, onSave, classInfo }) => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get('http://localhost:8081/teachers');
+      const res = await axios.get('http://localhost:8080/teachers');
       setTeachers(res.data || []);
     } catch (e) {
       console.error('Lỗi khi lấy danh sách giảng viên:', e);

@@ -30,7 +30,7 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/classes");
+      const res = await axios.get("http://localhost:8080/classes");
       setClasses(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách lớp:", e);
@@ -39,7 +39,7 @@ const Classes = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/teachers");
+      const res = await axios.get("http://localhost:8080/teachers");
       setTeachers(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách giảng viên:", e);
@@ -48,7 +48,7 @@ const Classes = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách môn học:", e);
@@ -109,7 +109,7 @@ const Classes = () => {
     if (!id) return;
     if (window.confirm("Bạn có chắc muốn xoá lớp này?")) {
       try {
-        await axios.delete(`http://localhost:8081/classes/${id}`);
+        await axios.delete(`http://localhost:8080/classes/${id}`);
         fetchClasses();
       } catch (e) {
         console.error("Lỗi khi xoá lớp:", e);
@@ -121,9 +121,9 @@ const Classes = () => {
   const handleSave = async (classData) => {
     try {
       if (editingClass) {
-        await axios.put(`http://localhost:8081/classes/${editingClass.classId}`, classData);
+        await axios.put(`http://localhost:8080/classes/${editingClass.classId}`, classData);
       } else {
-        await axios.post("http://localhost:8081/classes", classData);
+        await axios.post("http://localhost:8080/classes", classData);
       }
       fetchClasses();
       setIsModalOpen(false);
