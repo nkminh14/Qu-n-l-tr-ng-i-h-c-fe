@@ -33,7 +33,7 @@
 }
 
 .search-input {
-    padding: 10px 10px 10px 35px; /* Adjust padding for icon */
+    padding: 10px 40px 10px 10px; /* Right padding for icon */
     border: 1px solid #e0e0e0;
     border-radius: 5px;
     width: 100%; /* Take full width of its wrapper */
@@ -42,7 +42,9 @@
 
 .search-icon {
     position: absolute;
-    left: 10px;
+    right: 12px; /* Icon on the right */
+    top: 50%;
+    transform: translateY(-50%);
     color: #888;
     font-size: 1.1em;
 }
