@@ -59,15 +59,42 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty }) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const validationErrors = validate(formData);
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
+
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate(formData);
+    if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return;
+    }
+
+    try {
+        // Gọi API lưu dữ liệu
+        const response = await fetch('/api/faculties', {
+            method: faculty ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            if (response.status === 400 && errorData.error === 'DUPLICATE_DATA') {
+                setErrors({ facultyName: errorData.message }); // Hiển thị ngay dưới input
+                return;
+            }
+            alert('Có lỗi xảy ra: ' + (errorData.message || 'Vui lòng thử lại!'));
             return;
         }
+
+        // Thành công
+        alert(faculty ? 'Cập nhật khoa thành công!' : 'Thêm khoa thành công!');
         onSave(formData);
-    };
+        onClose();
+    } catch (err) {
+        alert('Không thể kết nối đến server!');
+    }
+};
+
 
     return (
         <div style={styles.overlay}>
