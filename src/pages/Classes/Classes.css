@@ -37,7 +37,7 @@
 
 /* Ô nhập tìm kiếm */
 .search-input {
-    padding: 10px 10px 10px 35px;
+    padding: 10px 40px 10px 10px;
     border: 1px solid #e0e0e0;
     border-radius: 5px;
     width: 100%;
@@ -47,7 +47,9 @@
 /* Icon kính lúp */
 .search-icon {
     position: absolute;
-    left: 10px;
+    right: 12px; /* Icon on the right */
+    top: 50%;
+    transform: translateY(-50%);
     color: #888;
     font-size: 1.1em;
 }
