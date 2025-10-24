@@ -255,6 +255,81 @@ const validate = (data) => {
 
 /* ===== STYLES ===== */
 const styles = {
+    overlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000
+    },
+    modal: {
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '600px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+    },
+    form: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    formRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: '15px',
+    },
+    formField: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '48%',
+    },
+    label: {
+        marginBottom: '5px',
+        textAlign: 'left',
+        fontWeight: 'bold',
+    },
+    input: {
+        width: '100%',
+        padding: '10px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        boxSizing: 'border-box',
+    },
+    buttons: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        marginTop: '20px',
+    },
+    saveButton: {
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontSize: '16px',
+    },
+    cancelButton: {
+        backgroundColor: '#f44336',
+        color: 'white',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        marginLeft: '10px',
+        fontSize: '16px',
+    },
+    error: {
+        color: 'red',
+        fontSize: '12px',
+        marginTop: '5px',
+        textAlign: 'left',
+    },
   overlay: {
     position: 'fixed',
     inset: 0,
