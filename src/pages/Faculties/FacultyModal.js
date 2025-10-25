@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const FacultyModal = ({ isOpen, onClose, onSave, faculty }) => {
+const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
     // 1. Thay đổi state để phù hợp với các trường của Khoa
     const [formData, setFormData] = useState({
         facultyName: '',
@@ -60,7 +60,7 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty }) => {
     };
 
 
-const handleSubmit = async (e) => {
+const handleSubmit = (e) => { // Bỏ async vì không cần await nữa
     e.preventDefault();
     const validationErrors = validate(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -68,33 +68,13 @@ const handleSubmit = async (e) => {
         return;
     }
 
-    try {
-        // Gọi API lưu dữ liệu
-        const response = await fetch('/api/faculties', {
-            method: faculty ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            if (response.status === 400 && errorData.error === 'DUPLICATE_DATA') {
-                setErrors({ facultyName: errorData.message }); // Hiển thị ngay dưới input
-                return;
-            }
-            alert('Có lỗi xảy ra: ' + (errorData.message || 'Vui lòng thử lại!'));
-            return;
-        }
-
-        // Thành công
-        alert(faculty ? 'Cập nhật khoa thành công!' : 'Thêm khoa thành công!');
-        onSave(formData);
-        onClose();
-    } catch (err) {
-        alert('Không thể kết nối đến server!');
-    }
+    // Chỉ cần gọi onSave và truyền dữ liệu đi
+    // Hàm handleSave ở component cha (Faculties.js) sẽ lo phần còn lại:
+    // 1. Gọi API bằng axios
+    // 2. Tải lại danh sách (fetchFaculties)
+    // 3. Đóng modal (setIsModalOpen(false))
+    onSave(formData);
 };
-
 
     return (
         <div style={styles.overlay}>
@@ -141,6 +121,7 @@ const handleSubmit = async (e) => {
                             {errors.description && <p style={styles.error}>{errors.description}</p>}
                         </div>
                     </div>
+                    {serverError && (<p style={styles.serverError}>{serverError}</p>)}
                     <div style={styles.buttons}>
                         <button type="submit" style={styles.saveButton}>Lưu</button>
                         <button type="button" onClick={onClose} style={styles.cancelButton}>Hủy</button>
@@ -227,6 +208,17 @@ const styles = {
         cursor: 'pointer',
         marginLeft: '10px',
         fontSize: '16px',
+    },
+    serverError: {
+        color: 'red',
+        fontSize: '14px',
+        textAlign: 'center',
+        marginBottom: '15px',
+        marginTop: '0px',
+        padding: '10px',
+        backgroundColor: '#fff0f0',
+        borderRadius: '4px',
+        border: '1px solid red',
     },
     error: {
         color: 'red',
