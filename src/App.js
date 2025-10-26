@@ -8,7 +8,7 @@ import Home from "./pages/Home/Home";
 import Students from "./pages/Students/Students";
 import Teachers from "./pages/Teachers/Teachers";
 import Classes from "./pages/Classes/Classes";
-import Faculties from "./pages/Faculties/Faculties";
+import Faculties from "./pages/Faculties/faculties";
 import Subjects from "./pages/Subjects/Subjects";
 import Grades from "./pages/Grades/Grades";
 import Tuition from "./pages/Tuition/Tuition";

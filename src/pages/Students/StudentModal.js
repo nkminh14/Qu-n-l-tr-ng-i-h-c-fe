@@ -72,7 +72,12 @@ const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) 
             setErrors(validationErrors);
             return;
         }
-        onSave(formData);
+        const dataToSave = {
+            ...formData,
+            classId: parseInt(formData.classId, 10),
+            facultyId: parseInt(formData.facultyId, 10),
+        };
+        onSave(dataToSave);
     };
 
     return (
@@ -116,7 +121,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) 
                             <label style={styles.label}>Khoa</label>
                             <select name="facultyId" value={formData.facultyId} onChange={handleChange} placeholder="Mã khoa" style={styles.input}>
                                 <option value="">Chọn khoa</option>
-                                {faculties.map(faculty => (
+                                {faculties && faculties.map(faculty => (
                                     <option key={faculty.facultyId} value={faculty.facultyId}>
                                         {faculty.facultyName}
                                     </option>

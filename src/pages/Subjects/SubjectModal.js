@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 
-const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
+const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [], serverError }) => {
   const [formData, setFormData] = useState({
     subjectName: "",
     credits: "",
     description: "",
-    facultyId: "",
+    facultyId: "",        // select
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (subject) {
-      // copy dữ liệu để sửa
+      // Copy dữ liệu khi sửa
       setFormData({
         subjectName: subject.subjectName ?? "",
         credits: subject.credits ?? "",
@@ -19,7 +19,7 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
         facultyId: subject.facultyId ?? "",
       });
     } else {
-      // reset khi tạo mới
+      // Reset form khi thêm mới
       setFormData({
         subjectName: "",
         credits: "",
@@ -32,31 +32,34 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
 
   if (!isOpen) return null;
 
+  // Validate giống pattern trong FacultyModal
   const validate = (data) => {
     const newErrors = {};
-
     if (!data.subjectName) newErrors.subjectName = "Tên môn không được để trống";
 
     if (data.credits === "" || data.credits === null) {
       newErrors.credits = "Số tín chỉ không được để trống";
     } else if (!/^\d+$/.test(String(data.credits))) {
-      newErrors.credits = "Số tín chỉ phải là số nguyên không âm";
+      newErrors.credits = "Số tín chỉ phải là số nguyên dương";
+    } else if (Number(data.credits) <= 0) {
+      newErrors.credits = "Số tín chỉ phải lớn hơn 0";
     }
 
-    if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
+    // facultyId có thể để trống nếu bạn cho phép tạo môn chưa thuộc khoa
+    // Nếu bắt buộc chọn khoa, bỏ comment dòng dưới:
+    // if (!data.facultyId) newErrors.facultyId = "Vui lòng chọn khoa";
 
+    // description không bắt buộc
     return newErrors;
-    };
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // ép credits về number nếu có nhập
-    if (name === "credits") {
-      const v = value;
-      setFormData((prev) => ({ ...prev, [name]: v === "" ? "" : v.replace(/\D/g, "") }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "credits" ? value.replace(/[^\d]/g, "") : value, // giữ số cho credits
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -67,21 +70,21 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
       return;
     }
 
-    // Chuẩn hóa dữ liệu gửi BE
+    // Chuẩn hóa kiểu dữ liệu trước khi gửi ra ngoài
     const payload = {
       subjectName: formData.subjectName.trim(),
-      credits: Number(formData.credits),
+      credits: formData.credits === "" ? null : Number(formData.credits),
       description: formData.description?.trim() || "",
-      facultyId: Number(formData.facultyId),
+      facultyId: formData.facultyId === "" ? null : Number(formData.facultyId),
     };
 
-    onSave(payload);
+    onSave(payload); // Phần còn lại để Subjects.js xử lý (axios, toast, đóng modal, fetch lại)
   };
 
   return (
     <div style={styles.overlay}>
       <div style={styles.modal}>
-        <h2>{subject ? "Sửa môn học" : "Thêm môn học"}</h2>
+        <h2>{subject ? "Sửa thông tin Môn học" : "Thêm Môn học mới"}</h2>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.formRow}>
@@ -101,11 +104,11 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
               <label style={styles.label}>Số tín chỉ</label>
               <input
                 name="credits"
+                inputMode="numeric"
                 value={formData.credits}
                 onChange={handleChange}
                 placeholder="VD: 3"
                 style={styles.input}
-                inputMode="numeric"
               />
               {errors.credits && <p style={styles.error}>{errors.credits}</p>}
             </div>
@@ -114,48 +117,48 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
           <div style={styles.formRow}>
             <div style={styles.formField}>
               <label style={styles.label}>Khoa</label>
-              {faculties?.length > 0 ? (
-                <select
-                  name="facultyId"
-                  value={formData.facultyId}
-                  onChange={handleChange}
-                  style={styles.input}
-                >
-                  <option value="">-- Chọn khoa --</option>
-                  {faculties.map((f) => (
-                    <option key={f.facultyId} value={f.facultyId}>
-                      {f.facultyName}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  name="facultyId"
-                  value={formData.facultyId}
-                  onChange={handleChange}
-                  placeholder="Mã khoa (VD: 1)"
-                  style={styles.input}
-                />
-              )}
+              <select
+                name="facultyId"
+                value={formData.facultyId}
+                onChange={handleChange}
+                style={styles.input}
+              >
+                <option value="">-- Chọn khoa --</option>
+                {faculties.map((f) => (
+                  <option key={f.facultyId} value={f.facultyId}>
+                    {f.facultyName}
+                  </option>
+                ))}
+              </select>
               {errors.facultyId && <p style={styles.error}>{errors.facultyId}</p>}
             </div>
 
-            <div style={styles.formField}>
+            <div style={styles.formFieldFull} />
+          </div>
+
+          <div style={styles.formRow}>
+            <div style={styles.formFieldFull}>
               <label style={styles.label}>Mô tả</label>
-              <input
+              <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Mô tả ngắn"
-                style={styles.input}
+                placeholder="Mô tả ngắn về môn học"
+                style={{ ...styles.input, height: "80px" }}
               />
-              {/* Mô tả không bắt buộc */}
+              {errors.description && <p style={styles.error}>{errors.description}</p>}
             </div>
           </div>
 
+          {serverError && <p style={styles.serverError}>{serverError}</p>}
+
           <div style={styles.buttons}>
-            <button type="submit" style={styles.saveButton}>Lưu</button>
-            <button type="button" onClick={onClose} style={styles.cancelButton}>Hủy</button>
+            <button type="submit" style={styles.saveButton}>
+              Lưu
+            </button>
+            <button type="button" onClick={onClose} style={styles.cancelButton}>
+              Hủy
+            </button>
           </div>
         </form>
       </div>
@@ -163,15 +166,13 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [] }) => {
   );
 };
 
-/* Giữ nguyên style giống StudentModal để đồng bộ UI */
+// Dùng lại styles giống FacultyModal
 const styles = {
   overlay: {
     position: "fixed",
-    inset: 0,
+    top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    display: "flex", justifyContent: "center", alignItems: "center",
     zIndex: 1000,
   },
   modal: {
@@ -181,20 +182,22 @@ const styles = {
     width: "600px",
     boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
   },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-  },
+  form: { display: "flex", flexDirection: "column" },
   formRow: {
     display: "flex",
     justifyContent: "space-between",
-    gap: "16px",
     marginBottom: "15px",
+    gap: "20px",
   },
   formField: {
     display: "flex",
     flexDirection: "column",
-    width: "48%",
+    width: "100%",
+  },
+  formFieldFull: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
   },
   label: {
     marginBottom: "5px",
@@ -232,11 +235,23 @@ const styles = {
     marginLeft: "10px",
     fontSize: "16px",
   },
+  serverError: {
+    color: "red",
+    fontSize: "14px",
+    textAlign: "center",
+    marginBottom: "15px",
+    marginTop: "0px",
+    padding: "10px",
+    backgroundColor: "#fff0f0",
+    borderRadius: "4px",
+    border: "1px solid red",
+  },
   error: {
     color: "red",
     fontSize: "12px",
     marginTop: "5px",
     textAlign: "left",
+    margin: 0,
   },
 };
 
