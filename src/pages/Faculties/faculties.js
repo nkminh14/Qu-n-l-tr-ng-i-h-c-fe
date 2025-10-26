@@ -26,7 +26,7 @@ const Faculties = () => {
 
 const fetchFaculties = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/faculties");
+            const response = await axios.get("http://localhost:8080/faculties");
             setFaculties(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách khoa:", error);
@@ -72,7 +72,7 @@ const fetchFaculties = async () => {
     const handleDelete = async (id) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa khoa này không?")) {
             try {
-                await axios.delete(`http://localhost:8080/api/faculties/${id}`);
+                await axios.delete(`http://localhost:8080/faculties/${id}`);
                 fetchFaculties();
                 // 6. THAY ĐỔI: Dùng toast cho thành công
                 toast.success("Đã xóa khoa thành công!");
@@ -89,10 +89,10 @@ const handleSave = async (facultyData) => {
         // Đây là thay đổi quan trọng nhất (Chiến lược Lỗi trong Modal)
         try {
             if (editingFaculty) {
-                await axios.put(`http://localhost:8080/api/faculties/${editingFaculty.facultyId}`, facultyData);
+                await axios.put(`http://localhost:8080/faculties/${editingFaculty.facultyId}`, facultyData);
                 toast.success("Cập nhật khoa thành công!"); // 8. THÊM MỚI
             } else {
-                await axios.post("http://localhost:8080/api/faculties", facultyData);
+                await axios.post("http://localhost:8080/faculties", facultyData);
                 toast.success("Thêm khoa mới thành công!"); // 9. THÊM MỚI
             }
             fetchFaculties();

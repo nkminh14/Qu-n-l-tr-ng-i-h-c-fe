@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import TuitionModel from "./TuitionModel";
 import Table from "../../components/Table/Table";
+import { Link } from "react-router-dom";
 import "./Tuition.css";
 
 const Tuition = () => {
   const [tuitions, setTuitions] = useState([]);
+  const [students, setStudents] = useState([]);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState("asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +19,7 @@ const Tuition = () => {
 
   useEffect(() => {
     fetchTuitions();
+    fetchStudents();
   }, []);
 
   const fetchTuitions = async () => {
@@ -26,6 +29,20 @@ const Tuition = () => {
     } catch (error) {
       console.error("Lỗi khi lấy danh sách học phí:", error);
     }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/students");
+      setStudents(response.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách sinh viên:", error);
+    }
+  };
+
+  const getStudentLink = (studentCode) => {
+    const student = students.find((s) => s.studentCode === studentCode);
+    return student ? <Link to={`/students`}>{student.name}</Link> : studentCode;
   };
 
   const handleSort = (columnKey) => {
@@ -117,21 +134,10 @@ const Tuition = () => {
     setCurrentPage(n);
   };
 
-  // MSSV 
-  // const [studentsDropdown, setStudentsDropdown] = useState([]);
-
-  // useEffect(() => {
-  //     fetchStudentsDropdown();
-  // }, []);
-
-  // const fetchStudentsDropdown = async () => {
-  //     try {
-  //         const response = await axios.get("http://localhost:8080/students/dropdown");
-  //         setStudentsDropdown(response.data);
-  //     } catch (error) {
-  //         console.error("Lỗi lấy Dropdown MSSV:", error);
-  //     }
-  // };
+  const tuitionDataWithDetails = currentItems.map((tuition) => ({
+    ...tuition,
+    studentCode: getStudentLink(tuition.studentCode),
+  }));
 
   return (
     <div className="page-container">
@@ -164,7 +170,7 @@ const Tuition = () => {
       <div className="table-scroll-container">
         <Table
           columns={columns}
-          data={currentItems}
+          data={tuitionDataWithDetails}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onSort={handleSort}
