@@ -4,20 +4,24 @@ import SubjectModal from "./SubjectModal";
 import Table from "../../components/Table/Table";
 import { Link } from "react-router-dom";
 import "./Subjects.css";
+import { toast } from "react-toastify";
 
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
-  const [faculties, setFaculties] = useState([]); 
+  const [faculties, setFaculties] = useState([]);
+
+  // Sort / Search / Pagination
   const [sortColumn, setSortColumn] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc"); 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState(null);
-
+  const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchType, setSearchType] = useState("name"); 
-
+  const [searchType, setSearchType] = useState("name"); // name | subjectId | credits
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(null);
+  const [modalError, setModalError] = useState(null);
 
   useEffect(() => {
     fetchSubjects();
@@ -26,19 +30,21 @@ const Subjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/subjects");
+      const res = await axios.get("http://localhost:8081/subjects");
       setSubjects(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách môn học:", err);
+      toast.error("Không thể tải danh sách môn học. Vui lòng thử lại.");
     }
   };
 
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/faculties");
+      const res = await axios.get("http://localhost:8081/faculties");
       setFaculties(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách khoa:", err);
+      toast.error("Không thể tải danh sách khoa. Vui lòng thử lại.");
     }
   };
 
@@ -48,6 +54,7 @@ const Subjects = () => {
     return fac ? <Link to={`/faculties`}>{fac.facultyName}</Link> : "N/A";
   };
 
+  // Sort giống Faculties.js
   const handleSort = (columnKey) => {
     const isAsc = sortColumn === columnKey && sortOrder === "asc";
     const newSortOrder = isAsc ? "desc" : "asc";
@@ -74,11 +81,13 @@ const Subjects = () => {
 
   const handleAdd = () => {
     setEditingSubject(null);
+    setModalError(null); // reset lỗi cũ
     setIsModalOpen(true);
   };
 
   const handleEdit = (subject) => {
     setEditingSubject(subject);
+    setModalError(null); // reset lỗi cũ
     setIsModalOpen(true);
   };
 
@@ -89,10 +98,14 @@ const Subjects = () => {
 
     if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
       try {
-        await axios.delete(`http://localhost:8080/subjects/${id}`);
+        await axios.delete(`http://localhost:8081/subjects/${id}`);
         fetchSubjects();
+        toast.success("Đã xóa môn học thành công!");
       } catch (err) {
         console.error("Lỗi khi xóa môn học:", err);
+        const errorMessage =
+          err.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+        toast.error(errorMessage);
       }
     }
   };
@@ -101,30 +114,38 @@ const Subjects = () => {
     try {
       if (editingSubject) {
         await axios.put(
-          `http://localhost:8080/subjects/${editingSubject.subjectId}`,
+          `http://localhost:8081/subjects/${editingSubject.subjectId}`,
           subjectData
         );
+        toast.success("Cập nhật môn học thành công!");
       } else {
-        await axios.post("http://localhost:8080/subjects", subjectData);
+        await axios.post("http://localhost:8081/subjects", subjectData);
+        toast.success("Thêm môn học mới thành công!");
       }
       fetchSubjects();
       setIsModalOpen(false);
+      setModalError(null);
     } catch (err) {
       console.error("Lỗi khi lưu môn học:", err);
+      const errorMessage =
+        err.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+      // Hiển thị lỗi bên trong modal
+      setModalError(errorMessage);
+      // Không đóng modal để người dùng sửa lại
     }
   };
 
   const columns = [
-    { title: "ID", key: "subjectId" },
+    { title: "ID", key: "subjectId", sortable: true },
     { title: "Tên môn", key: "subjectName", sortable: true },
     { title: "Số tín chỉ", key: "credits", sortable: true },
     { title: "Mô tả", key: "description" },
     { title: "Khoa", key: "facultyId" },
   ];
 
+  // Filter giống Faculties.js
   const filteredSubjects = subjects.filter((s) => {
     const q = (searchTerm || "").toLowerCase();
-
     switch (searchType) {
       case "subjectId":
         return String(s.subjectId ?? "").includes(q);
@@ -136,16 +157,23 @@ const Subjects = () => {
     }
   });
 
+  // Pagination giống Faculties.js
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentList = filteredSubjects.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredSubjects.length / itemsPerPage);
   const paginate = (p) => setCurrentPage(p);
 
+  // Render cột Khoa bằng tên + Link
   const dataWithFaculty = currentList.map((s) => ({
     ...s,
     facultyId: getFacultyName(s.facultyId),
   }));
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalError(null); // clear lỗi khi đóng modal
+  };
 
   return (
     <div className="page-container">
@@ -212,20 +240,18 @@ const Subjects = () => {
             {i + 1}
           </button>
         ))}
-        <button
-          onClick={() => paginate(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
+        <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>
           Tiếp
         </button>
       </div>
 
       <SubjectModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSave={handleSave}
         subject={editingSubject}
-        faculties={faculties || []} 
+        faculties={faculties || []}
+        serverError={modalError}
       />
     </div>
   );
