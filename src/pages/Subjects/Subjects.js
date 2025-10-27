@@ -30,7 +30,7 @@ const Subjects = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách môn học:", err);
@@ -40,7 +40,7 @@ const Subjects = () => {
 
   const fetchFaculties = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/faculties");
+      const res = await axios.get("http://localhost:8080/faculties");
       setFaculties(res.data || []);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách khoa:", err);
@@ -98,7 +98,7 @@ const Subjects = () => {
 
     if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
       try {
-        await axios.delete(`http://localhost:8081/subjects/${id}`);
+        await axios.delete(`http://localhost:8080/subjects/${id}`);
         fetchSubjects();
         toast.success("Đã xóa môn học thành công!");
       } catch (err) {
@@ -114,12 +114,12 @@ const Subjects = () => {
     try {
       if (editingSubject) {
         await axios.put(
-          `http://localhost:8081/subjects/${editingSubject.subjectId}`,
+          `http://localhost:8080/subjects/${editingSubject.subjectId}`,
           subjectData
         );
         toast.success("Cập nhật môn học thành công!");
       } else {
-        await axios.post("http://localhost:8081/subjects", subjectData);
+        await axios.post("http://localhost:8080/subjects", subjectData);
         toast.success("Thêm môn học mới thành công!");
       }
       fetchSubjects();

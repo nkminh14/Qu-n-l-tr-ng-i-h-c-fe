@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const ClassModal = ({
   isOpen,
@@ -6,7 +7,6 @@ const ClassModal = ({
   onSave,
   classInfo,
   serverError,        // ⬅ nhận lỗi từ cha để hiển thị trong modal
-  teachers = [],
   subjects = [],
 }) => {
   const [formData, setFormData] = useState({
@@ -19,7 +19,18 @@ const ClassModal = ({
     startTime: "",
     endTime: "",
   });
+  const [suitableTeachers, setSuitableTeachers] = useState([]);
   const [errors, setErrors] = useState({});
+
+  const fetchSuitableTeachers = async (subjectId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/teachers/subject/${subjectId}`);
+      setSuitableTeachers(response.data);
+    } catch (error) {
+      console.error("Error fetching suitable teachers:", error);
+      setSuitableTeachers([]);
+    }
+  };
 
   useEffect(() => {
     if (classInfo) {
@@ -33,6 +44,9 @@ const ClassModal = ({
         startTime: classInfo.startTime ? String(classInfo.startTime).slice(0, 5) : "",
         endTime: classInfo.endTime ? String(classInfo.endTime).slice(0, 5) : "",
       });
+      if (classInfo.subjectId) {
+        fetchSuitableTeachers(classInfo.subjectId);
+      }
     } else {
       setFormData({
         subjectId: "",
@@ -44,9 +58,18 @@ const ClassModal = ({
         startTime: "",
         endTime: "",
       });
+      setSuitableTeachers([]); // Clear suitable teachers when adding a new class
     }
     setErrors({});
   }, [classInfo, isOpen]);
+
+  useEffect(() => {
+    if (formData.subjectId) {
+      fetchSuitableTeachers(formData.subjectId);
+    } else {
+      setSuitableTeachers([]);
+    }
+  }, [formData.subjectId]);
 
   if (!isOpen) return null;
 
@@ -95,7 +118,13 @@ const ClassModal = ({
   // ===== HANDLERS =====
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const newFormData = { ...prev, [name]: value };
+      if (name === "subjectId") {
+        newFormData.teacherId = ""; // Reset teacher when subject changes
+      }
+      return newFormData;
+    });
   };
 
   const handleSubmit = (e) => {
@@ -158,7 +187,7 @@ const ClassModal = ({
                 style={styles.input}
               >
                 <option value="">-- Chọn giảng viên --</option>
-                {teachers.map((t) => (
+                {suitableTeachers.map((t) => (
                   <option key={t.teacherId} value={t.teacherId}>
                     {t.name}
                   </option>
