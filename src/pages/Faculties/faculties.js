@@ -54,18 +54,18 @@ const fetchFaculties = async () => {
                 return 0;
             }
         });
-        setFaculties(sorted); // Cập nhật lại state đã sắp xếp
+        setFaculties(sorted); 
     };
 
     const handleAdd = () => {
         setEditingFaculty(null);
-        setModalError(null); // <-- 4. THÊM MỚI: Reset lỗi cũ
+        setModalError(null); 
         setIsModalOpen(true);
     };
 
     const handleEdit = (faculty) => {
         setEditingFaculty(faculty);
-        setModalError(null); // <-- 5. THÊM MỚI: Reset lỗi cũ
+        setModalError(null); 
         setIsModalOpen(true);
     };
 
@@ -74,11 +74,9 @@ const fetchFaculties = async () => {
             try {
                 await axios.delete(`http://localhost:8080/faculties/${id}`);
                 fetchFaculties();
-                // 6. THAY ĐỔI: Dùng toast cho thành công
                 toast.success("Đã xóa khoa thành công!");
             } catch (error) {
                 console.error("Lỗi khi xóa khoa:", error);
-                // 7. THAY ĐỔI: Dùng toast cho lỗi khi xóa
                 const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
                 toast.error(errorMessage);
             }
@@ -86,41 +84,36 @@ const fetchFaculties = async () => {
     };
 
 const handleSave = async (facultyData) => {
-        // Đây là thay đổi quan trọng nhất (Chiến lược Lỗi trong Modal)
         try {
             if (editingFaculty) {
                 await axios.put(`http://localhost:8080/faculties/${editingFaculty.facultyId}`, facultyData);
-                toast.success("Cập nhật khoa thành công!"); // 8. THÊM MỚI
+                toast.success("Cập nhật khoa thành công!"); 
             } else {
                 await axios.post("http://localhost:8080/faculties", facultyData);
-                toast.success("Thêm khoa mới thành công!"); // 9. THÊM MỚI
+                toast.success("Thêm khoa mới thành công!"); 
             }
             fetchFaculties();
-            setIsModalOpen(false); // Đóng modal khi thành công
-            setModalError(null); // Xóa lỗi cũ khi thành công
+            setIsModalOpen(false); 
+            setModalError(null); 
         } catch (error) {
             console.error("Lỗi khi lưu thông tin khoa:", error);
             
-            // 10. THAY ĐỔI: Dùng setModalError thay vì toast
-            // Lỗi sẽ được hiển thị BÊN TRONG modal
             const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
             setModalError(errorMessage);
             
-            // Quan trọng: KHÔNG đóng modal, để người dùng sửa lại
         }
     };
 
     const columns = [
-        { title: 'ID', key: 'facultyId', sortable: true }, // Thêm sortable
+        { title: 'ID', key: 'facultyId', sortable: true }, 
         { title: 'Tên Khoa', key: 'facultyName', sortable: true },
-        { title: 'Trưởng Khoa', key: 'dean', sortable: true }, // Thêm sortable
+        { title: 'Trưởng Khoa', key: 'dean', sortable: true }, 
         { title: 'SĐT', key: 'phone' },
         { title: 'Email', key: 'email' },
         { title: 'Địa chỉ', key: 'address' },
         { title: 'Mô tả', key: 'description' },
     ];
 
-    // 4. Thêm logic Lọc (Filter)
     const filteredFaculties = faculties.filter(faculty => {
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
         switch (searchType) {
@@ -135,7 +128,6 @@ const handleSave = async (facultyData) => {
         }
     });
 
-    // 5. Thêm logic Phân trang (Pagination)
     const indexOfLastFaculty = currentPage * itemsPerPage;
     const indexOfFirstFaculty = indexOfLastFaculty - itemsPerPage;
     const currentFaculties = filteredFaculties.slice(indexOfFirstFaculty, indexOfLastFaculty);
@@ -144,9 +136,9 @@ const handleSave = async (facultyData) => {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setModalError(null); // <-- 11. THÊM MỚI: Đảm bảo lỗi được xóa khi đóng modal
+        setModalError(null); 
     };
-    // 6. Cập nhật JSX
+
     return (
         <div className="page-container">
             <h2>📚 Trang Quản lý Khoa</h2>
@@ -159,7 +151,7 @@ const handleSave = async (facultyData) => {
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
-                            setCurrentPage(1); // Reset về trang 1 khi tìm kiếm
+                            setCurrentPage(1); 
                         }}
                         className="search-input"
                     />
@@ -182,11 +174,11 @@ const handleSave = async (facultyData) => {
             <div className="table-scroll-container">
                 <Table
                     columns={columns}
-                    data={currentFaculties} // Dùng data đã phân trang
+                    data={currentFaculties} 
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onSort={handleSort} // Dùng hàm sort mới
-                    sortColumn={sortColumn} // Truyền cột sort
+                    onSort={handleSort} 
+                    sortColumn={sortColumn} 
                     sortOrder={sortOrder}
                 />
             </div>
