@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
-    // 1. Thay đổi state để phù hợp với các trường của Khoa
+
     const [formData, setFormData] = useState({
         facultyName: '',
         dean: '',
@@ -14,9 +14,8 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
 
     useEffect(() => {
         if (faculty) {
-            setFormData({ ...faculty }); // Copy dữ liệu khi sửa
+            setFormData({ ...faculty }); 
         } else {
-            // Reset form về trạng thái rỗng khi thêm mới
             setFormData({
                 facultyName: '',
                 dean: '',
@@ -26,12 +25,12 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
                 description: '',
             });
         }
-        setErrors({}); // Xóa các lỗi cũ mỗi khi modal mở/đóng
+        setErrors({}); 
     }, [faculty, isOpen]);
 
     if (!isOpen) return null;
 
-    // 2. Cập nhật lại logic validation cho Khoa
+
     const validate = (data) => {
         const newErrors = {};
 
@@ -40,7 +39,7 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
         
         if (!data.phone) {
             newErrors.phone = "Số điện thoại không được để trống";
-        } else if (!/^0\d{9}$/.test(data.phone)) { // Bắt đầu bằng 0, tổng 10 số
+        } else if (!/^0\d{9}$/.test(data.phone)) { 
             newErrors.phone = "SĐT phải bắt đầu bằng 0 và có 10 chữ số";
         }
         
@@ -49,7 +48,10 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
         } else if (!/\S+@\S+\.\S+/.test(data.email)) {
             newErrors.email = "Email không hợp lệ";
         }
-        // Các trường address và description có thể không bắt buộc
+
+        if (!data.address) newErrors.address = "Địa chỉ không được để trống";
+
+        if (!data.description) newErrors.description = "Mô tả không được để trống";
 
         return newErrors;
     };
@@ -60,7 +62,7 @@ const FacultyModal = ({ isOpen, onClose, onSave, faculty, serverError }) => {
     };
 
 
-const handleSubmit = (e) => { // Bỏ async vì không cần await nữa
+const handleSubmit = (e) => { 
     e.preventDefault();
     const validationErrors = validate(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -132,7 +134,6 @@ const handleSubmit = (e) => { // Bỏ async vì không cần await nữa
     );
 };
 
-// 5. Giữ nguyên phần styles vì nó dùng chung được
 const styles = {
     overlay: {
         position: 'fixed',
