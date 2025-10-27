@@ -117,6 +117,7 @@ const handleSave = async (facultyData) => {
         { title: 'SĐT', key: 'phone' },
         { title: 'Email', key: 'email' },
         { title: 'Địa chỉ', key: 'address' },
+        { title: 'Mô tả', key: 'description' },
     ];
 
     // 4. Thêm logic Lọc (Filter)
