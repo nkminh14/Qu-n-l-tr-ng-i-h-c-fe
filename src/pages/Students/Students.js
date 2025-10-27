@@ -145,7 +145,7 @@ const Students = () => {
                 return student.studentId.toString().includes(lowerCaseSearchTerm);
             case 'name':
                 return student.name.toLowerCase().includes(lowerCaseSearchTerm);
-            case 'gradeId':
+            case 'classId':
                 return student.classId.toString().toLowerCase().includes(lowerCaseSearchTerm);
             default:
                 return (
@@ -200,7 +200,7 @@ const Students = () => {
                 >
                     <option value="name">Tìm theo Tên</option>
                     <option value="studentId">Tìm theo ID</option>
-                    <option value="gradeId">Tìm theo Lớp</option>
+                    <option value="classId">Tìm theo Lớp</option>
                 </select>
                 <button onClick={handleAdd} className="add-button">
                     Thêm Sinh viên
