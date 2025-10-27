@@ -8,18 +8,16 @@ import { toast } from "react-toastify";
 
 const Classes = () => {
   const [classes, setClasses] = useState([]);
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState([]);   // dùng để hiển thị tên GV trong bảng
   const [subjects, setSubjects] = useState([]);
 
-  // Sort / Search / Pagination
   const [sortColumn, setSortColumn] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
+  const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchType, setSearchType] = useState("subject"); // subject | classId | semester
+  const [searchType, setSearchType] = useState("subject");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState(null);
   const [modalError, setModalError] = useState(null);
@@ -32,7 +30,7 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/classes");
+      const res = await axios.get("http://localhost:8081/classes");
       setClasses(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách lớp:", e);
@@ -42,7 +40,7 @@ const Classes = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/teachers");
+      const res = await axios.get("http://localhost:8081/teachers");
       setTeachers(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách giảng viên:", e);
@@ -52,12 +50,19 @@ const Classes = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/subjects");
+      const res = await axios.get("http://localhost:8081/subjects");
       setSubjects(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách môn học:", e);
       toast.error("Không thể tải danh sách môn học. Vui lòng thử lại.");
     }
+  };
+
+  // ⬇️ HÀM MỚI: lấy danh sách GV đúng môn (truyền xuống Modal)
+  const getTeachersBySubject = async (subjectId) => {
+    if (!subjectId) return [];
+    const res = await axios.get(`http://localhost:8081/teachers/subject/${subjectId}`);
+    return res.data || [];
   };
 
   const getTeacherName = (teacherId) => {
@@ -71,12 +76,14 @@ const Classes = () => {
     return s ? <Link to="/subjects">{s.subjectName}</Link> : (subjectId ? `#${subjectId}` : "Chưa gán");
   };
 
-  const dayLabel = (d) =>
-    ({ 1: "CN", 2: "T2", 3: "T3", 4: "T4", 5: "T5", 6: "T6", 7: "T7" }[d] || "");
-
+  const isoToVN = (s) => {
+    if (!s) return "";
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
+  };
+  const displayVN = (s) => (!s ? "" : (/^\d{2}\/\d{2}\/\d{4}$/.test(s) ? s : isoToVN(s)));
   const trimTime = (t) => (t ? t.slice(0, 5) : "");
 
-  // Sort giống Faculties.js
   const handleSort = (columnKey) => {
     const isAsc = sortColumn === columnKey && sortOrder === "asc";
     const newSortOrder = isAsc ? "desc" : "asc";
@@ -86,18 +93,13 @@ const Classes = () => {
     const sorted = [...classes].sort((a, b) => {
       const aVal = a[columnKey];
       const bVal = b[columnKey];
-
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return newSortOrder === "asc"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+        return newSortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       } else if (typeof aVal === "number" && typeof bVal === "number") {
         return newSortOrder === "asc" ? aVal - bVal : bVal - aVal;
       } else {
         const toStr = (v) => (v == null ? "" : String(v));
-        return newSortOrder === "asc"
-          ? toStr(aVal).localeCompare(toStr(bVal))
-          : toStr(bVal).localeCompare(toStr(aVal));
+        return newSortOrder === "asc" ? toStr(aVal).localeCompare(toStr(bVal)) : toStr(bVal).localeCompare(toStr(aVal));
       }
     });
 
@@ -106,23 +108,22 @@ const Classes = () => {
 
   const handleAdd = () => {
     setEditingClass(null);
-    setModalError(null); // reset lỗi cũ
+    setModalError(null);
     setIsModalOpen(true);
   };
 
   const handleEdit = (row) => {
     setEditingClass(row);
-    setModalError(null); // reset lỗi cũ
+    setModalError(null);
     setIsModalOpen(true);
   };
 
   const handleDelete = async (rowOrId) => {
     const id = typeof rowOrId === "object" ? rowOrId.classId : Number(rowOrId);
     if (!id) return;
-
     if (window.confirm("Bạn có chắc muốn xoá lớp này?")) {
       try {
-        await axios.delete(`http://localhost:8080/classes/${id}`);
+        await axios.delete(`http://localhost:8081/classes/${id}`);
         fetchClasses();
         toast.success("Đã xoá lớp thành công!");
       } catch (e) {
@@ -133,17 +134,13 @@ const Classes = () => {
     }
   };
 
-  // Save giống Faculties.js: thành công → toast + đóng modal; lỗi → hiển thị trong modal
   const handleSave = async (classData) => {
     try {
       if (editingClass) {
-        await axios.put(
-          `http://localhost:8080/classes/${editingClass.classId}`,
-          classData
-        );
+        await axios.put(`http://localhost:8081/classes/${editingClass.classId}`, classData);
         toast.success("Cập nhật lớp học thành công!");
       } else {
-        await axios.post("http://localhost:8080/classes", classData);
+        await axios.post("http://localhost:8081/classes", classData);
         toast.success("Thêm lớp học mới thành công!");
       }
       fetchClasses();
@@ -151,15 +148,8 @@ const Classes = () => {
       setModalError(null);
     } catch (e) {
       console.error("Lỗi khi lưu lớp học:", e);
-      const status = e?.response?.status;
       const msg = e?.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
-      // 409 (trùng giờ/phòng) cũng sẽ hiển thị trong modal
       setModalError(msg);
-      // Không đóng modal để người dùng chỉnh lại
-      if (status !== 409) {
-        // tuỳ chọn: có thể thêm toast để biết có lỗi khác
-        // toast.error(msg);
-      }
     }
   };
 
@@ -167,18 +157,16 @@ const Classes = () => {
     { title: "ID", key: "classId", sortable: true },
     { title: "Môn học", key: "subjectName", sortable: true },
     { title: "Giảng viên", key: "teacherId" },
-    { title: "Thứ", key: "dayOfWeek" },
+    { title: "Ngày học", key: "studyDate", sortable: true },
     { title: "Giờ học", key: "timeRange" },
     { title: "Học kỳ", key: "semester", sortable: true },
     { title: "Năm học", key: "academicYear", sortable: true },
     { title: "Phòng", key: "room" },
   ];
 
-  // Filter giống Faculties.js
   const filtered = classes.filter((c) => {
     const q = (searchTerm || "").toLowerCase();
     if (!q) return true;
-
     switch (searchType) {
       case "classId":
         return String(c.classId || "").includes(q);
@@ -194,25 +182,23 @@ const Classes = () => {
     }
   });
 
-  // Pagination giống Faculties.js
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentList = filtered.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginate = (p) => setCurrentPage(p);
 
-  // Chuẩn bị data hiển thị
   const dataForTable = currentList.map((c) => ({
     ...c,
     subjectName: getSubjectName(c.subjectId, c.subjectName),
     teacherId: getTeacherName(c.teacherId),
-    dayOfWeek: dayLabel(c.dayOfWeek),
+    studyDate: displayVN(c.studyDate),
     timeRange: `${trimTime(c.startTime)} - ${trimTime(c.endTime)}`,
   }));
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setModalError(null); // clear lỗi khi đóng modal
+    setModalError(null);
   };
 
   return (
@@ -224,14 +210,9 @@ const Classes = () => {
           <div className="search-input-wrapper">
             <input
               type="text"
-              placeholder={`Tìm theo ${
-                searchType === "subject" ? "Môn học" : searchType === "classId" ? "ID" : "Học kỳ"
-              }...`}
+              placeholder={`Tìm theo ${searchType === "subject" ? "Môn học" : searchType === "classId" ? "ID" : "Học kỳ"}...`}
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               className="search-input"
             />
             <span className="search-icon">🔍</span>
@@ -247,9 +228,7 @@ const Classes = () => {
             <option value="semester">Tìm theo Học kỳ</option>
           </select>
 
-          <button onClick={handleAdd} className="add-button">
-            Thêm Lớp học
-          </button>
+          <button onClick={handleAdd} className="add-button">Thêm Lớp học</button>
         </div>
 
         <div className="table-scroll-container">
@@ -265,21 +244,13 @@ const Classes = () => {
         </div>
 
         <div className="pagination">
-          <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
-            Trước
-          </button>
+          <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>Trước</button>
           {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => paginate(i + 1)}
-              className={currentPage === i + 1 ? "active" : ""}
-            >
+            <button key={i + 1} onClick={() => paginate(i + 1)} className={currentPage === i + 1 ? "active" : ""}>
               {i + 1}
             </button>
           ))}
-          <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>
-            Tiếp
-          </button>
+          <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>Tiếp</button>
         </div>
       </div>
 
@@ -288,9 +259,10 @@ const Classes = () => {
         onClose={handleCloseModal}
         onSave={handleSave}
         classInfo={editingClass}
-        serverError={modalError}   // ⬅️ lỗi hiển thị bên trong modal
-        teachers={teachers}        // nếu cần select GV trong modal
-        subjects={subjects}        // nếu cần select Môn trong modal
+        serverError={modalError}
+        subjects={subjects}
+        // ✅ Chỉ sửa phần giảng viên: truyền hàm lấy GV theo môn
+        getTeachersBySubject={getTeachersBySubject}
       />
     </>
   );
