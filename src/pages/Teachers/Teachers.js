@@ -3,6 +3,8 @@ import axios from "axios";
 import TeacherModal from "./TeacherModal";
 import Table from "../../components/Table/Table";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import "./Teachers.css";
 
 const Teachers = () => {
@@ -28,7 +30,7 @@ const Teachers = () => {
             const response = await axios.get("http://localhost:8080/teachers");
             setTeachers(response.data);
         } catch (error) {
-            console.error("Error fetching teachers:", error);
+            toast.error("Error fetching teachers: " + error.message);
         }
     };
 
@@ -37,7 +39,7 @@ const Teachers = () => {
             const response = await axios.get("http://localhost:8080/faculties");
             setFaculties(response.data);
         } catch (error) {
-            console.error("Lỗi khi lấy danh sách khoa:", error);
+            toast.error("Lỗi khi lấy danh sách khoa: " + error.message);
         }
     };
 
@@ -81,7 +83,7 @@ const Teachers = () => {
                 await axios.delete(`http://localhost:8080/teachers/${id}`);
                 fetchTeachers();
             } catch (error) {
-                console.error("Error deleting teacher:", error);
+                toast.error("Error deleting teacher: " + error.message);
             }
         }
     };
@@ -102,12 +104,12 @@ const Teachers = () => {
             );
 
             if (isPhoneNumberTaken) {
-                alert("Số điện thoại đã tồn tại. Vui lòng sử dụng số điện thoại khác.");
+                toast.error("Số điện thoại đã tồn tại. Vui lòng sử dụng số điện thoại khác.");
                 return;
             }
 
             if (isEmailTaken) {
-                alert("Email đã tồn tại. Vui lòng sử dụng email khác.");
+                toast.error("Email đã tồn tại. Vui lòng sử dụng email khác.");
                 return;
             }
 
@@ -119,8 +121,8 @@ const Teachers = () => {
             fetchTeachers();
             setIsModalOpen(false);
         } catch (error) {
-            console.error("Error saving teacher:", error);
-            alert("Đã xảy ra lỗi khi lưu giảng viên. Vui lòng thử lại.");
+            toast.error("Error saving teacher: " + error.message);
+            toast.error("Đã xảy ra lỗi khi lưu giảng viên. Vui lòng thử lại.");
         }
     };
 
@@ -234,6 +236,7 @@ const Teachers = () => {
                 onSave={handleSave}
                 teacher={editingTeacher}
             />
+            <ToastContainer />
         </div>
     );
 };
