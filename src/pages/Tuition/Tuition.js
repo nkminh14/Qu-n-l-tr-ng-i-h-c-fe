@@ -30,7 +30,7 @@ const Tuition = () => {
 
   const fetchTuitions = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/tuitions");
+      const res = await axios.get("http://localhost:8080/tuitions");
       setTuitions(res.data || []);
     } catch (err) {
       toast.error("Không thể tải danh sách học phí!");
@@ -39,7 +39,7 @@ const Tuition = () => {
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/students");
+      const res = await axios.get("http://localhost:8080/students");
       setStudents(res.data || []);
     } catch (err) {
       toast.error("Không thể tải danh sách sinh viên!");
@@ -103,7 +103,7 @@ const Tuition = () => {
 
     if (window.confirm("Bạn có chắc chắn muốn xóa học phí này không?")) {
       try {
-        await axios.delete(`http://localhost:8081/tuitions/${id}`);
+        await axios.delete(`http://localhost:8080/tuitions/${id}`);
         fetchTuitions();
         toast.success("Xóa thành công!");
       } catch (err) {
@@ -116,12 +116,12 @@ const Tuition = () => {
     try {
       if (editingTuition) {
         await axios.put(
-          `http://localhost:8081/tuitions/${editingTuition.tuitionId}`,
+          `http://localhost:8080/tuitions/${editingTuition.tuitionId}`,
           tuitionData
         );
         toast.success("Cập nhật thành công!");
       } else {
-        await axios.post("http://localhost:8081/tuitions", tuitionData);
+        await axios.post("http://localhost:8080/tuitions", tuitionData);
         toast.success("Thêm thành công!");
       }
       fetchTuitions();

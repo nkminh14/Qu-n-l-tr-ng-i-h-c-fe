@@ -174,7 +174,7 @@ const Teachers = () => {
 
     return (
         <div className="page-container">
-            <h2>📚 Trang Quản lý Giảng viên</h2>
+            <h2>Trang Quản lý Giảng viên</h2>
 
             <div className="search-pagination-controls">
                 <div className="search-input-wrapper">
