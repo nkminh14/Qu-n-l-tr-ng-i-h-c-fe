@@ -44,6 +44,7 @@ const SubjectModal = ({ isOpen, onClose, onSave, subject, faculties = [], server
     } else if (Number(data.credits) <= 0) {
       newErrors.credits = "Số tín chỉ phải lớn hơn 0";
     }
+    if (!data.description) newErrors.description = "Mô tả không được để trống";
 
     // facultyId có thể để trống nếu bạn cho phép tạo môn chưa thuộc khoa
     // Nếu bắt buộc chọn khoa, bỏ comment dòng dưới:
