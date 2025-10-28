@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
-const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) => {
+
+const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes, serverError }) => {
     const [formData, setFormData] = useState({
         studentCode: '',
         name: '',
@@ -48,7 +48,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) 
         if (!data.facultyId) newErrors.facultyId = "Khoa không được để trống";
         if (!data.phone) {
             newErrors.phone = "Số điện thoại không được để trống";
-        } else if (!/^\d{10}$/.test(data.phone)) {
+        } else if (!/^0\d{9}$/.test(data.phone)) {
             newErrors.phone = "Số điện thoại phải có 10 chữ số";
         }
         if (!data.email) {
@@ -142,6 +142,7 @@ const StudentModal = ({ isOpen, onClose, onSave, student, faculties, classes }) 
                             {errors.email && <p style={styles.error}>{errors.email}</p>}
                         </div>
                     </div>
+                    {serverError && (<p style={styles.serverError}>{serverError}</p>)}
                     <div style={styles.buttons}>
                         <button type="submit" style={styles.saveButton}>Lưu</button>
                         <button onClick={onClose} style={styles.cancelButton}>Hủy</button>
@@ -226,6 +227,17 @@ const styles = {
         cursor: 'pointer',
         marginLeft: '10px',
         fontSize: '16px',
+    },
+        serverError: {
+        color: 'red',
+        fontSize: '14px',
+        textAlign: 'center',
+        marginBottom: '15px',
+        marginTop: '0px',
+        padding: '10px',
+        backgroundColor: '#fff0f0',
+        borderRadius: '4px',
+        border: '1px solid red',
     },
     error: {
         color: 'red',
