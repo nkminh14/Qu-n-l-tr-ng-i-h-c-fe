@@ -177,7 +177,7 @@ const Subjects = () => {
 
   return (
     <div className="page-container">
-      <h2>📘 Trang Quản lý Môn học</h2>
+      <h2> Trang Quản lý Môn học</h2>
 
       <div className="search-pagination-controls">
         <div className="search-input-wrapper">

@@ -199,7 +199,7 @@ const studentDataWithDetails = currentStudents.map((student) => ({
     };
     return (
         <div className="page-container">
-            <h2>📚 Trang Quản lý Sinh viên</h2>
+            <h2> Trang Quản lý Sinh viên</h2>
 
             <div className="search-pagination-controls">
                 <div className="search-input-wrapper">

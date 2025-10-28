@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { Link } from "react-router-dom";
 import "./Home.css";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
@@ -12,8 +13,9 @@ const Home = () => {
     const [totalTeachers, setTotalTeachers] = useState(0);
     const [totalSubjects, setTotalSubjects] = useState(0);
     const [totalFaculties, setTotalFaculties] = useState(0);
-    const [paidTuitionStudentsCount, setPaidTuitionStudentsCount] = useState(0);
-    const [unpaidTuitionStudentsCount, setUnpaidTuitionStudentsCount] = useState(0);
+    const [paidTuitionsCount, setPaidTuitionsCount] = useState(0);
+    const [tuitions, setTuitions] = useState([]);
+
     const [totalGradesRecorded, setTotalGradesRecorded] = useState(0);
     const [studentsPerClassChartData, setStudentsPerClassChartData] = useState({
         labels: [],
@@ -60,7 +62,8 @@ const Home = () => {
                 const teachers = teachersRes.data || [];
                 const subjects = subjectsRes.data || [];
                 const faculties = facultiesRes.data || [];
-                const tuitions = tuitionsRes.data || [];
+                const tuitionsData = tuitionsRes.data || [];
+                setTuitions(tuitionsData);
                 const grades = gradesRes.data || [];
 
                 setTotalStudents(students.length);
@@ -70,14 +73,11 @@ const Home = () => {
                 setTotalFaculties(faculties.length);
                 setTotalGradesRecorded(grades.length);
 
-                // Calculate paid tuition students
-                const paidStudents = new Set(
-                    tuitions
-                        .filter((t) => t.status === "Đã đóng")
-                        .map((t) => t.studentCode)
-                );
-                setPaidTuitionStudentsCount(paidStudents.size);
-                setUnpaidTuitionStudentsCount(students.length - paidStudents.size);
+                const paidTuitionsCountValue = tuitionsData.filter(t => t.status === "PAID").length;
+                const unpaidTuitionsCount = tuitionsData.filter(t => t.status === "UNPAID").length;
+                const partialTuitionsCount = tuitionsData.filter(t => t.status === "PARTIAL").length;
+
+                setPaidTuitionsCount(paidTuitionsCountValue);
 
                 // Calculate students per class
                 const classMap = new Map();
@@ -110,18 +110,20 @@ const Home = () => {
                 });
 
                 setTuitionStatusChartData({
-                    labels: ['Đã đóng học phí', 'Chưa đóng học phí'],
+                    labels: ['Đã đóng', 'Chưa đóng', 'Đóng một phần'],
                     datasets: [
                         {
-                            label: 'Số lượng Sinh viên',
-                            data: [paidStudents.size, students.length - paidStudents.size],
+                            label: 'Số lượng',
+                            data: [paidTuitionsCountValue, unpaidTuitionsCount, partialTuitionsCount],
                             backgroundColor: [
                                 'rgba(54, 162, 235, 0.6)',
                                 'rgba(255, 99, 132, 0.6)',
+                                'rgba(255, 206, 86, 0.6)',
                             ],
                             borderColor: [
                                 'rgba(54, 162, 235, 1)',
                                 'rgba(255, 99, 132, 1)',
+                                'rgba(255, 206, 86, 1)',
                             ],
                             borderWidth: 1,
                         },
@@ -323,8 +325,8 @@ const Home = () => {
                     <p className="stat-value">{totalFaculties}</p>
                 </div>
                 <div className="stat-card">
-                    <h3>Sinh viên đã đóng học phí</h3>
-                    <p className="stat-value">{paidTuitionStudentsCount}</p>
+                    <h3>Tổng số học phí</h3>
+                    <p className="stat-value">{tuitions.length}</p>
                 </div>
                 <div className="stat-card">
                     <h3>Tổng số Điểm đã ghi nhận</h3>
@@ -336,9 +338,11 @@ const Home = () => {
                 <div className="chart-card">
                     <Bar data={studentsPerClassChartData} options={barChartOptions} />
                 </div>
-                <div className="chart-card">
-                    <Doughnut data={tuitionStatusChartData} options={doughnutChartOptions} />
-                </div>
+                <Link to="/tuition" className="chart-card-link">
+                    <div className="chart-card">
+                        <Doughnut data={tuitionStatusChartData} options={doughnutChartOptions} />
+                    </div>
+                </Link>
                 <div className="chart-card">
                     <Bar data={averageGradesPerSubjectChartData} options={averageGradesChartOptions} />
                 </div>

@@ -182,7 +182,7 @@ const Tuition = () => {
 
   return (
     <div className="page-container">
-      <h2>💳 Trang Quản lý Học phí</h2>
+      <h2> Trang Quản lý Học phí</h2>
 
       {/* Search Bar */}
       <div className="search-pagination-controls">

@@ -92,7 +92,7 @@ const Grades = () => {
 
     return (
         <div style={{ padding: "40px", textAlign: "center" }}>
-            <h2>📊 Trang Quản lý Điểm Sinh viên</h2>
+            <h2> Trang Quản lý Điểm Sinh viên</h2>
 
             <div className="search-pagination-controls">    
                 <div className="search-input-wrapper">
