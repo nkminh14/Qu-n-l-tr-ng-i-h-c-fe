@@ -47,32 +47,22 @@ function App() {
 
     return (
         <Router>
-            <div className="app-layout">
-                <Navbar isLoggedIn={isLoggedIn} />
-                <Sidebar isLoggedIn={isLoggedIn} onLogout={handleLogout} onShowLogin={handleShowLogin} />
-                <div className="main-content-area"> {/* Area for main content and footer */}
-                    <div className="main-content">
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                            {isLoggedIn ? (
-                                <>
-                                    <Route path="/students" element={<Students />} />
-                                    <Route path="/teachers" element={<Teachers />} />
-                                    <Route path="/classes" element={<Classes />} />
-                                    <Route path="/faculties" element={<Faculties />} />
-                                    <Route path="/subjects" element={<Subjects />} />
-                                    <Route path="/grades" element={<Grades />} />
-                                    <Route path="/tuition" element={<Tuition />} />
-                                </>
-                            ) : (
-                                // Redirect any other path to home if not logged in
-                                <Route path="*" element={<Navigate to="/" />} />
-                            )}
-                        </Routes>
-                    </div>
-                    <Footer />
+            <div className="app-container">
+                <Navbar />
+                <div className="main-content">
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/students" element={<Students />} />
+                        <Route path="/teachers" element={<Teachers />} />
+                        <Route path="/classes" element={<Classes />} />
+                        <Route path="/Faculties" element={<Faculties/>}/>
+                        <Route path="/subjects" element={<Subjects />} />
+                        <Route path="/grades" element={<Grades />} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/tuition" element={<Tuition />} />
+                    </Routes>
                 </div>
-                <LoginModal show={showLogin} handleClose={handleCloseLogin} handleLogin={handleLogin} />
+                <Footer />
             </div>
         </Router>
     );

@@ -30,7 +30,7 @@ const Classes = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/classes");
+      const res = await axios.get("http://localhost:8080/classes");
       setClasses(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách lớp:", e);
@@ -40,7 +40,7 @@ const Classes = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/teachers");
+      const res = await axios.get("http://localhost:8080/teachers");
       setTeachers(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách giảng viên:", e);
@@ -50,7 +50,7 @@ const Classes = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8081/subjects");
+      const res = await axios.get("http://localhost:8080/subjects");
       setSubjects(res.data || []);
     } catch (e) {
       console.error("Lỗi khi lấy danh sách môn học:", e);
@@ -61,7 +61,7 @@ const Classes = () => {
   // ⬇️ HÀM MỚI: lấy danh sách GV đúng môn (truyền xuống Modal)
   const getTeachersBySubject = async (subjectId) => {
     if (!subjectId) return [];
-    const res = await axios.get(`http://localhost:8081/teachers/subject/${subjectId}`);
+    const res = await axios.get(`http://localhost:8080/teachers/subject/${subjectId}`);
     return res.data || [];
   };
 
@@ -123,7 +123,7 @@ const Classes = () => {
     if (!id) return;
     if (window.confirm("Bạn có chắc muốn xoá lớp này?")) {
       try {
-        await axios.delete(`http://localhost:8081/classes/${id}`);
+        await axios.delete(`http://localhost:8080/classes/${id}`);
         fetchClasses();
         toast.success("Đã xoá lớp thành công!");
       } catch (e) {
@@ -137,10 +137,10 @@ const Classes = () => {
   const handleSave = async (classData) => {
     try {
       if (editingClass) {
-        await axios.put(`http://localhost:8081/classes/${editingClass.classId}`, classData);
+        await axios.put(`http://localhost:8080/classes/${editingClass.classId}`, classData);
         toast.success("Cập nhật lớp học thành công!");
       } else {
-        await axios.post("http://localhost:8081/classes", classData);
+        await axios.post("http://localhost:8080/classes", classData);
         toast.success("Thêm lớp học mới thành công!");
       }
       fetchClasses();
