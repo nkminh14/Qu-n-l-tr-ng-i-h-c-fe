@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import StudentModal from "./StudentModal";
 import Table from "../../components/Table/Table";
-import { Link } from "react-router-dom";
 import "./Students.css"; // Import Students.css
+import { toast } from 'react-toastify';
 
 const Students = () => {
     const [students, setStudents] = useState([]);
@@ -13,6 +13,7 @@ const Students = () => {
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState(null);
+    const [modalError, setModalError] = useState(null);
     const [searchTerm, setSearchTerm] = useState(""); // State for search term
     const [searchType, setSearchType] = useState("name"); // New state for search type: 'name', 'studentId', 'gradeId'
     const [currentPage, setCurrentPage] = useState(1); // State for current page
@@ -31,6 +32,7 @@ const Students = () => {
             setStudents(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách sinh viên:", error);
+            toast.error("Không thể tải danh sách sinh viên.");
         }
     };
 
@@ -40,6 +42,7 @@ const Students = () => {
             setFaculties(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách khoa:", error);
+            toast.error("Không thể tải danh sách khoa.");
         }
     };
 
@@ -49,21 +52,23 @@ const Students = () => {
             setClasses(response.data);
         } catch (error) {
             console.error("Lỗi khi lấy danh sách lớp:", error);
+            toast.error("Không thể tải danh sách lớp.");
+            
         }
     };
 
     // Lấy tên khoa từ facultyId
-    const getFacultyName = (facultyId) => {
-        if (!faculties) return "Loading..."; // Handle loading state for faculties
+const getFacultyName = (facultyId) => {
+        if (!faculties) return "Loading..."; 
         const faculty = faculties.find((f) => f.facultyId === facultyId);
-        return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
+        return faculty ? faculty.facultyName : "N/A";
     };
-
     // Lấy tên lớp từ classId
-    const getClassName = (classId) => {
-        if (!classes) return "Loading..."; // Handle loading state for classes
+const getClassName = (classId) => {
+        if (!classes) return "Loading..."; 
         const a_class = classes.find((c) => c.classId === classId);
-        return a_class ? <Link to={`/classes`}>{a_class.subjectName}</Link> : "N/A";
+        // Lấy tên lớp (giả sử ClassDTO của bạn có subjectName)
+        return a_class ? a_class.subjectName : "N/A";
     };
 
     // Sắp xếp danh sách
@@ -91,11 +96,13 @@ const Students = () => {
 
     const handleAdd = () => {
         setEditingStudent(null);
+        setModalError(null); 
         setIsModalOpen(true);
     };
 
     const handleEdit = (student) => {
         setEditingStudent(student);
+        setModalError(null); 
         setIsModalOpen(true);
     };
 
@@ -104,8 +111,11 @@ const Students = () => {
             try {
                 await axios.delete(`http://localhost:8080/students/${id}`);
                 fetchStudents();
+                toast.success("Đã xóa sinh viên thành công!");
             } catch (error) {
                 console.error("Lỗi khi xóa sinh viên:", error);
+                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+                toast.error(errorMessage);
             }
         }
     };
@@ -116,13 +126,18 @@ const Students = () => {
         try {
             if (editingStudent) {
                 await axios.put(`http://localhost:8080/students/${editingStudent.studentId}`, studentData);
+                toast.success("Cập nhật sinh viên thành công!");
             } else {
                 await axios.post("http://localhost:8080/students", studentData);
+                toast.success("Thêm sinh viên mới thành công!"); 
             }
             fetchStudents();
             setIsModalOpen(false);
+            setModalError(null); 
         } catch (error) {
             console.error("Lỗi khi lưu sinh viên:", error);
+            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+            setModalError(errorMessage);
         }
     };
 
@@ -131,8 +146,8 @@ const Students = () => {
         { title: 'MSSV', key: 'studentCode', sortable: true },
         { title: 'Tên', key: 'name', sortable: true },
         { title: 'Ngày sinh', key: 'dateOfBirth' },
-        { title: 'Lớp', key: 'classId' },
-        { title: 'Khoa', key: 'facultyId' },
+        { title: 'Lớp', key: 'className' },
+        { title: 'Khoa', key: 'facultyName' },
         { title: 'SĐT', key: 'phone' },
         { title: 'Email', key: 'email' },
     ];
@@ -140,19 +155,22 @@ const Students = () => {
     // Filter students based on search term and type
     const filteredStudents = students.filter(student => {
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const facultyName = getFacultyName(student.facultyId)?.toLowerCase() || '';
+        const className = getClassName(student.classId)?.toLowerCase() || '';
         switch (searchType) {
             case 'studentId':
                 return student.studentId.toString().includes(lowerCaseSearchTerm);
             case 'name':
                 return student.name.toLowerCase().includes(lowerCaseSearchTerm);
-            case 'classId':
-                return student.classId.toString().toLowerCase().includes(lowerCaseSearchTerm);
+            case 'classId': 
+                return className.includes(lowerCaseSearchTerm);
             default:
+                // Tìm kiếm chung
                 return (
                     student.name.toLowerCase().includes(lowerCaseSearchTerm) ||
                     student.studentCode.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    (faculties && getFacultyName(student.facultyId).props && getFacultyName(student.facultyId).props.children.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                    (classes && getClassName(student.classId).props && getClassName(student.classId).props.children.toLowerCase().includes(lowerCaseSearchTerm))
+                    facultyName.includes(lowerCaseSearchTerm) ||
+                    className.includes(lowerCaseSearchTerm)
                 );
         }
     });
@@ -169,12 +187,16 @@ const Students = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     // Thêm tên khoa và lớp vào dữ liệu sinh viên
-    const studentDataWithDetails = currentStudents.map((student) => ({
+const studentDataWithDetails = currentStudents.map((student) => ({
         ...student,
-        facultyId: getFacultyName(student.facultyId),
-        classId: getClassName(student.classId),
+        facultyName: getFacultyName(student.facultyId), 
+        className: getClassName(student.classId),     
     }));
 
+        const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setModalError(null); 
+    };
     return (
         <div className="page-container">
             <h2>📚 Trang Quản lý Sinh viên</h2>
@@ -235,11 +257,12 @@ const Students = () => {
 
             <StudentModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 onSave={handleSave}
                 student={editingStudent}
                 faculties={faculties}
                 classes={classes}
+                serverError={modalError}
             />
         </div>
     );

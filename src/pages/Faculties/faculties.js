@@ -15,7 +15,7 @@ const Faculties = () => {
     const [sortColumn, setSortColumn] = useState(null);
     const [sortOrder, setSortOrder] = useState("asc"); // asc | desc
     const [searchTerm, setSearchTerm] = useState("");
-    const [searchType, setSearchType] = useState("facultyName"); // facultyName | facultyId | dean
+    const [searchType, setSearchType] = useState("facultyName"); 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -141,7 +141,7 @@ const handleSave = async (facultyData) => {
 
     return (
         <div className="page-container">
-            <h2>📚 Trang Quản lý Khoa</h2>
+            <h2> Trang Quản lý Khoa</h2>
 
             <div className="search-pagination-controls">
                 <div className="search-input-wrapper">
