@@ -5,6 +5,8 @@ import { Doughnut, Bar } from 'react-chartjs-2';
 import { Link } from "react-router-dom";
 import "./Home.css";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 const Home = () => {
@@ -36,26 +38,27 @@ const Home = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [
-                    studentsRes,
-                    classesRes,
-                    teachersRes,
-                    subjectsRes,
-                    facultiesRes,
-                    tuitionsRes,
-                    gradesRes,
-                ] = await axios.all([
-                    axios.get("http://localhost:8080/students"),
-                    axios.get("http://localhost:8080/classes"),
-                    axios.get("http://localhost:8080/teachers"),
-                    axios.get("http://localhost:8080/subjects"),
-                    axios.get("http://localhost:8080/faculties"),
-                    axios.get("http://localhost:8080/tuitions"),
-                    axios.get("http://localhost:8080/grades"),
-                ]);
+useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // 2. Sử dụng API_URL cho tất cả các request
+                const [
+                    studentsRes,
+                    classesRes,
+                    teachersRes,
+                    subjectsRes,
+                    facultiesRes,
+                    tuitionsRes,
+                    gradesRes,
+                ] = await axios.all([
+                    axios.get(`${API_URL}/students`),
+                    axios.get(`${API_URL}/classes`),
+                    axios.get(`${API_URL}/teachers`),
+                    axios.get(`${API_URL}/subjects`),
+                    axios.get(`${API_URL}/faculties`),
+                    axios.get(`${API_URL}/tuitions`),
+                    axios.get(`${API_URL}/grades`),
+                ]);
 
                 const students = studentsRes.data || [];
                 const classes = classesRes.data || [];
