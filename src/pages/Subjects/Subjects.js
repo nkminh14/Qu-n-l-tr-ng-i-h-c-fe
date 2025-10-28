@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import "./Subjects.css";
 import { toast } from "react-toastify";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 const Subjects = () => {
   const [subjects, setSubjects] = useState([]);
   const [faculties, setFaculties] = useState([]);
@@ -28,31 +30,33 @@ const Subjects = () => {
     fetchFaculties();
   }, []);
 
-  const fetchSubjects = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/subjects");
-      setSubjects(res.data || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách môn học:", err);
-      toast.error("Không thể tải danh sách môn học. Vui lòng thử lại.");
-    }
-  };
+const fetchSubjects = async () => {
+        try {
+            // 2. Sửa URL
+            const res = await axios.get(`${API_URL}/subjects`);
+            setSubjects(res.data || []);
+        } catch (err) {
+            console.error("Lỗi khi lấy danh sách môn học:", err);
+            toast.error("Không thể tải danh sách môn học. Vui lòng thử lại.");
+        }
+    };
 
-  const fetchFaculties = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/faculties");
-      setFaculties(res.data || []);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách khoa:", err);
-      toast.error("Không thể tải danh sách khoa. Vui lòng thử lại.");
-    }
-  };
+    const fetchFaculties = async () => {
+        try {
+            // 3. Sửa URL
+            const res = await axios.get(`${API_URL}/faculties`);
+            setFaculties(res.data || []);
+        } catch (err) {
+            console.error("Lỗi khi lấy danh sách khoa:", err);
+            toast.error("Không thể tải danh sách khoa. Vui lòng thử lại.");
+        }
+    };
 
-  const getFacultyName = (facultyId) => {
-    if (!faculties) return "Loading...";
-    const fac = faculties.find((f) => f.facultyId === facultyId);
-    return fac ? <Link to={`/faculties`}>{fac.facultyName}</Link> : "N/A";
-  };
+const getFacultyName = (facultyId) => {
+        if (!faculties) return "Loading...";
+        const fac = faculties.find((f) => f.facultyId === facultyId);
+        return fac ? fac.facultyName : "N/A";
+    };
 
   // Sort giống Faculties.js
   const handleSort = (columnKey) => {
@@ -91,57 +95,52 @@ const Subjects = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (rowOrId) => {
-    const id =
-      typeof rowOrId === "object" ? rowOrId.subjectId : Number(rowOrId);
-    if (!id) return;
+const handleDelete = async (rowOrId) => {
+        const id = typeof rowOrId === "object" ? rowOrId.subjectId : Number(rowOrId);
+        if (!id) return;
 
-    if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
-      try {
-        await axios.delete(`http://localhost:8080/subjects/${id}`);
-        fetchSubjects();
-        toast.success("Đã xóa môn học thành công!");
-      } catch (err) {
-        console.error("Lỗi khi xóa môn học:", err);
-        const errorMessage =
-          err.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
-        toast.error(errorMessage);
-      }
-    }
-  };
+        if (window.confirm("Bạn có chắc chắn muốn xóa môn học này không?")) {
+            try {
+                // 4. Sửa URL
+                await axios.delete(`${API_URL}/subjects/${id}`);
+                fetchSubjects();
+                toast.success("Đã xóa môn học thành công!");
+            } catch (err) {
+                console.error("Lỗi khi xóa môn học:", err);
+                const errorMessage = err.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+                toast.error(errorMessage);
+            }
+        }
+    };
 
-  const handleSave = async (subjectData) => {
-    try {
-      if (editingSubject) {
-        await axios.put(
-          `http://localhost:8080/subjects/${editingSubject.subjectId}`,
-          subjectData
-        );
-        toast.success("Cập nhật môn học thành công!");
-      } else {
-        await axios.post("http://localhost:8080/subjects", subjectData);
-        toast.success("Thêm môn học mới thành công!");
-      }
-      fetchSubjects();
-      setIsModalOpen(false);
-      setModalError(null);
-    } catch (err) {
-      console.error("Lỗi khi lưu môn học:", err);
-      const errorMessage =
-        err.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
-      // Hiển thị lỗi bên trong modal
-      setModalError(errorMessage);
-      // Không đóng modal để người dùng sửa lại
-    }
-  };
+    const handleSave = async (subjectData) => {
+        try {
+            if (editingSubject) {
+                // 5. Sửa URL
+                await axios.put(`${API_URL}/subjects/${editingSubject.subjectId}`, subjectData);
+                toast.success("Cập nhật môn học thành công!");
+            } else {
+                // 6. Sửa URL
+                await axios.post(`${API_URL}/subjects`, subjectData);
+                toast.success("Thêm môn học mới thành công!");
+            }
+            fetchSubjects();
+            setIsModalOpen(false);
+            setModalError(null);
+        } catch (err) {
+            console.error("Lỗi khi lưu môn học:", err);
+            const errorMessage = err.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+            setModalError(errorMessage);
+        }
+    };
 
-  const columns = [
-    { title: "ID", key: "subjectId", sortable: true },
-    { title: "Tên môn", key: "subjectName", sortable: true },
-    { title: "Số tín chỉ", key: "credits", sortable: true },
-    { title: "Mô tả", key: "description" },
-    { title: "Khoa", key: "facultyId" },
-  ];
+ const columns = [
+        { title: "ID", key: "subjectId", sortable: true },
+        { title: "Tên môn", key: "subjectName", sortable: true },
+        { title: "Số tín chỉ", key: "credits", sortable: true },
+        { title: "Mô tả", key: "description" },
+        { title: "Khoa", key: "facultyName" }, // SỬA: Đổi key
+    ];
 
   // Filter giống Faculties.js
   const filteredSubjects = subjects.filter((s) => {
@@ -165,10 +164,10 @@ const Subjects = () => {
   const paginate = (p) => setCurrentPage(p);
 
   // Render cột Khoa bằng tên + Link
-  const dataWithFaculty = currentList.map((s) => ({
-    ...s,
-    facultyId: getFacultyName(s.facultyId),
-  }));
+const dataWithFaculty = currentList.map((s) => ({
+        ...s,
+        facultyName: getFacultyName(s.facultyId), // Giờ là text
+    }));
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -177,7 +176,7 @@ const Subjects = () => {
 
   return (
     <div className="page-container">
-      <h2> Trang Quản lý Môn học</h2>
+      <h2>Trang Quản lý Môn học</h2>
 
       <div className="search-pagination-controls">
         <div className="search-input-wrapper">

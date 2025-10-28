@@ -5,6 +5,8 @@ import Table from "../../components/Table/Table";
 import "./Students.css"; // Import Students.css
 import { toast } from 'react-toastify';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 const Students = () => {
     const [students, setStudents] = useState([]);
     const [faculties, setFaculties] = useState(null); // Initialize as null to check if fetched
@@ -26,36 +28,38 @@ const Students = () => {
         fetchClasses();
     }, []);
 
-    const fetchStudents = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/students");
-            setStudents(response.data);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách sinh viên:", error);
-            toast.error("Không thể tải danh sách sinh viên.");
-        }
-    };
+const fetchStudents = async () => {
+        try {
+            // 2. Sửa URL
+            const response = await axios.get(`${API_URL}/students`);
+            setStudents(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách sinh viên:", error);
+            toast.error("Không thể tải danh sách sinh viên.");
+        }
+    };
 
-    const fetchFaculties = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/faculties");
-            setFaculties(response.data);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách khoa:", error);
-            toast.error("Không thể tải danh sách khoa.");
-        }
-    };
+const fetchFaculties = async () => {
+        try {
+            // 3. Sửa URL
+            const response = await axios.get(`${API_URL}/faculties`);
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
+            toast.error("Không thể tải danh sách khoa.");
+        }
+    };
 
-    const fetchClasses = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/classes");
-            setClasses(response.data);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách lớp:", error);
-            toast.error("Không thể tải danh sách lớp.");
-            
-        }
-    };
+    const fetchClasses = async () => {
+        try {
+            // 4. Sửa URL
+            const response = await axios.get(`${API_URL}/classes`);
+            setClasses(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách lớp:", error);
+            toast.error("Không thể tải danh sách lớp.");
+        }
+    };
 
     // Lấy tên khoa từ facultyId
 const getFacultyName = (facultyId) => {
@@ -106,40 +110,41 @@ const getClassName = (classId) => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) {
-            try {
-                await axios.delete(`http://localhost:8080/students/${id}`);
-                fetchStudents();
-                toast.success("Đã xóa sinh viên thành công!");
-            } catch (error) {
-                console.error("Lỗi khi xóa sinh viên:", error);
-                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
-                toast.error(errorMessage);
-            }
-        }
-    };
+const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa sinh viên này không?")) {
+            try {
+                // 5. Sửa URL
+                await axios.delete(`${API_URL}/students/${id}`);
+                fetchStudents();
+                toast.success("Đã xóa sinh viên thành công!");
+            } catch (error) {
+                console.error("Lỗi khi xóa sinh viên:", error);
+                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+                toast.error(errorMessage);
+            }
+        }
+    };
 
-    const handleSave = async (studentData) => {
-        console.log("Saving student data:", studentData);
-        console.log("Editing student:", editingStudent);
-        try {
-            if (editingStudent) {
-                await axios.put(`http://localhost:8080/students/${editingStudent.studentId}`, studentData);
-                toast.success("Cập nhật sinh viên thành công!");
-            } else {
-                await axios.post("http://localhost:8080/students", studentData);
-                toast.success("Thêm sinh viên mới thành công!"); 
-            }
-            fetchStudents();
-            setIsModalOpen(false);
-            setModalError(null); 
-        } catch (error) {
-            console.error("Lỗi khi lưu sinh viên:", error);
-            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
-            setModalError(errorMessage);
-        }
-    };
+    const handleSave = async (studentData) => {
+        try {
+            if (editingStudent) {
+                // 6. Sửa URL
+                await axios.put(`${API_URL}/students/${editingStudent.studentId}`, studentData);
+                toast.success("Cập nhật sinh viên thành công!");
+            } else {
+                // 7. Sửa URL
+                await axios.post(`${API_URL}/students`, studentData);
+                toast.success("Thêm sinh viên mới thành công!");
+            }
+            fetchStudents();
+            setIsModalOpen(false);
+            setModalError(null);
+        } catch (error) {
+            console.error("Lỗi khi lưu sinh viên:", error);
+            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+            setModalError(errorMessage);
+        }
+    };
 
     const columns = [
         { title: 'ID', key: 'studentId' },
@@ -199,7 +204,7 @@ const studentDataWithDetails = currentStudents.map((student) => ({
     };
     return (
         <div className="page-container">
-            <h2> Trang Quản lý Sinh viên</h2>
+            <h2>Trang Quản lý Sinh viên</h2>
 
             <div className="search-pagination-controls">
                 <div className="search-input-wrapper">

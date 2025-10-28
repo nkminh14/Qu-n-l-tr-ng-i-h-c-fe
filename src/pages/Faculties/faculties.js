@@ -5,6 +5,8 @@ import Table from "../../components/Table/Table";
 import "./Faculties.css"; // 1. Import CSS của Students
 import { toast } from 'react-toastify';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 const Faculties = () => {
     const [faculties, setFaculties] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,15 +27,15 @@ const Faculties = () => {
     }, []);
 
 const fetchFaculties = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/faculties");
-            setFaculties(response.data);
-        } catch (error) {
-            console.error("Lỗi khi lấy danh sách khoa:", error);
-            // 3. THAY ĐỔI: Dùng toast cho lỗi tải trang
-            toast.error("Không thể tải danh sách khoa. Vui lòng thử lại.");
-        }
-    };
+        try {
+            // 2. Sửa URL
+            const response = await axios.get(`${API_URL}/faculties`); // Thay đổi URL
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error);
+            toast.error("Không thể tải danh sách khoa. Vui lòng thử lại.");
+        }
+    };
 
     // 3. Cập nhật hàm Sắp xếp (giống Students.js)
     const handleSort = (columnKey) => {
@@ -69,40 +71,41 @@ const fetchFaculties = async () => {
         setIsModalOpen(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa khoa này không?")) {
-            try {
-                await axios.delete(`http://localhost:8080/faculties/${id}`);
-                fetchFaculties();
-                toast.success("Đã xóa khoa thành công!");
-            } catch (error) {
-                console.error("Lỗi khi xóa khoa:", error);
-                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
-                toast.error(errorMessage);
-            }
-        }
-    };
+const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa khoa này không?")) {
+            try {
+                // 3. Sửa URL
+                await axios.delete(`${API_URL}/faculties/${id}`); // Thay đổi URL
+                fetchFaculties();
+                toast.success("Đã xóa khoa thành công!");
+            } catch (error) {
+                console.error("Lỗi khi xóa khoa:", error);
+                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+                toast.error(errorMessage);
+            }
+        }
+    };
 
 const handleSave = async (facultyData) => {
-        try {
-            if (editingFaculty) {
-                await axios.put(`http://localhost:8080/faculties/${editingFaculty.facultyId}`, facultyData);
-                toast.success("Cập nhật khoa thành công!"); 
-            } else {
-                await axios.post("http://localhost:8080/faculties", facultyData);
-                toast.success("Thêm khoa mới thành công!"); 
-            }
-            fetchFaculties();
-            setIsModalOpen(false); 
-            setModalError(null); 
-        } catch (error) {
-            console.error("Lỗi khi lưu thông tin khoa:", error);
-            
-            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
-            setModalError(errorMessage);
-            
-        }
-    };
+        try {
+            if (editingFaculty) {
+                // 4. Sửa URL
+                await axios.put(`${API_URL}/faculties/${editingFaculty.facultyId}`, facultyData); // Thay đổi URL
+                toast.success("Cập nhật khoa thành công!");
+            } else {
+                // 5. Sửa URL
+                await axios.post(`${API_URL}/faculties`, facultyData); // Thay đổi URL
+                toast.success("Thêm khoa mới thành công!");
+            }
+            fetchFaculties();
+            setIsModalOpen(false);
+            setModalError(null);
+        } catch (error) {
+            console.error("Lỗi khi lưu thông tin khoa:", error);
+            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+            setModalError(errorMessage);
+        }
+    };
 
     const columns = [
         { title: 'ID', key: 'facultyId', sortable: true }, 
@@ -141,7 +144,7 @@ const handleSave = async (facultyData) => {
 
     return (
         <div className="page-container">
-            <h2> Trang Quản lý Khoa</h2>
+            <h2>Trang Quản lý Khoa</h2>
 
             <div className="search-pagination-controls">
                 <div className="search-input-wrapper">

@@ -3,9 +3,10 @@ import axios from "axios";
 import TeacherModal from "./TeacherModal";
 import Table from "../../components/Table/Table";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
 import "./Teachers.css";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 const Teachers = () => {
     const [teachers, setTeachers] = useState([]);
@@ -17,6 +18,7 @@ const Teachers = () => {
     const [searchTerm, setSearchTerm] = useState(""); // State for search term
     const [searchType, setSearchType] = useState("name"); // New state for search type: 'name', 'email', 'faculty'
     const [currentPage, setCurrentPage] = useState(1); // State for current page
+    const [modalError, setModalError] = useState(null);
     const itemsPerPage = 10; // Items per page
 
     // Call API to get the list of teachers
@@ -25,135 +27,148 @@ const Teachers = () => {
         fetchFaculties();
     }, []);
 
-    const fetchTeachers = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/teachers");
-            setTeachers(response.data);
-        } catch (error) {
-            toast.error("Error fetching teachers: " + error.message);
-        }
-    };
+const fetchTeachers = async () => {
+        try {
+            // 2. Sửa URL
+            const response = await axios.get(`${API_URL}/teachers`);
+            setTeachers(response.data);
+        } catch (error) {
+            console.error("Error fetching teachers:", error); // Thêm log
+            toast.error("Lỗi khi tải danh sách giảng viên: " + error.message);
+        }
+    };
 
-    const fetchFaculties = async () => {
-        try {
-            const response = await axios.get("http://localhost:8080/faculties");
-            setFaculties(response.data);
-        } catch (error) {
-            toast.error("Lỗi khi lấy danh sách khoa: " + error.message);
-        }
-    };
+    const fetchFaculties = async () => {
+        try {
+            // 3. Sửa URL
+            const response = await axios.get(`${API_URL}/faculties`);
+            setFaculties(response.data);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách khoa:", error); // Thêm log
+            toast.error("Lỗi khi lấy danh sách khoa: " + error.message);
+        }
+    };
 
-    const getFacultyName = (facultyId) => {
-        const faculty = faculties.find((f) => f.facultyId === facultyId);
-        return faculty ? <Link to={`/faculties`}>{faculty.facultyName}</Link> : "N/A";
-    };
+const getFacultyName = (facultyId) => {
+        const faculty = faculties.find((f) => f.facultyId === facultyId);
+        return faculty ? faculty.facultyName : "N/A";
+    };
 
-    const handleSort = (columnKey) => {
-        const isAsc = sortColumn === columnKey && sortOrder === "asc";
-        const newSortOrder = isAsc ? "desc" : "asc";
-        
-        const sorted = [...filteredTeachers].sort((a, b) => {
-            if (a[columnKey] < b[columnKey]) {
-                return newSortOrder === "asc" ? -1 : 1;
-            }
-            if (a[columnKey] > b[columnKey]) {
-                return newSortOrder === "asc" ? 1 : -1;
-            }
-            return 0;
-        });
+const handleSort = (columnKey) => {
+        const isAsc = sortColumn === columnKey && sortOrder === "asc";
+        const newSortOrder = isAsc ? "desc" : "asc";
+        setSortColumn(columnKey);
+        setSortOrder(newSortOrder);
 
-        setTeachers(sorted);
-        setSortOrder(newSortOrder);
-        setSortColumn(columnKey);
-    };
+      // Nên sort trên filteredTeachers thay vì teachers gốc
+        const sorted = [...teachers].sort((a, b) => { // Sửa: sort teachers
+            let aVal = a[columnKey];
+            let bVal = b[columnKey];
 
-    const handleAdd = () => {
-        setEditingTeacher(null);
-        setIsModalOpen(true);
-    };
-
-    const handleEdit = (teacher) => {
-        setEditingTeacher(teacher);
-        setIsModalOpen(true);
-    };
-
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this teacher?")) {
-            try {
-                await axios.delete(`http://localhost:8080/teachers/${id}`);
-                fetchTeachers();
-            } catch (error) {
-                toast.error("Error deleting teacher: " + error.message);
-            }
-        }
-    };
-
-    const handleSave = async (teacherData) => {
-        try {
-            // Client-side validation for existing phone number and email
-            const isPhoneNumberTaken = teachers.some(
-                (teacher) =>
-                    teacher.phoneNumber === teacherData.phoneNumber &&
-                    (!editingTeacher || teacher.teacherId !== teacher.teacherId)
-            );
-
-            const isEmailTaken = teachers.some(
-                (teacher) =>
-                    teacher.email === teacherData.email &&
-                    (!editingTeacher || teacher.teacherId !== teacher.teacherId)
-            );
-
-            if (isPhoneNumberTaken) {
-                toast.error("Số điện thoại đã tồn tại. Vui lòng sử dụng số điện thoại khác.");
-                return;
+            // Xử lý trường facultyName đặc biệt
+            if (columnKey === 'facultyName') {
+                aVal = getFacultyName(a.facultyId);
+                bVal = getFacultyName(b.facultyId);
             }
 
-            if (isEmailTaken) {
-                toast.error("Email đã tồn tại. Vui lòng sử dụng email khác.");
-                return;
-            }
+            if (aVal == null) aVal = ''; // Xử lý null/undefined
+            if (bVal == null) bVal = '';
 
-            if (editingTeacher) {
-                await axios.put(`http://localhost:8080/teachers/${editingTeacher.teacherId}`, teacherData);
-            } else {
-                await axios.post("http://localhost:8080/teachers", teacherData);
-            }
-            fetchTeachers();
-            setIsModalOpen(false);
-        } catch (error) {
-            toast.error("Error saving teacher: " + error.message);
-            toast.error("Đã xảy ra lỗi khi lưu giảng viên. Vui lòng thử lại.");
-        }
-    };
+            if (typeof aVal === 'string' && typeof bVal === 'string') {
+                return newSortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+            } else if (typeof aVal === 'number' && typeof bVal === 'number') {
+                return newSortOrder === "asc" ? aVal - bVal : bVal - aVal;
+            } else {
+                // Fallback nếu kiểu dữ liệu khác nhau
+                const strA = String(aVal);
+                const strB = String(bVal);
+                return newSortOrder === "asc" ? strA.localeCompare(strB) : strB.localeCompare(strA);
+            }
+        });
+        setTeachers(sorted); // Cập nhật state teachers đã sort
+    };
 
-    const columns = [
-        { title: 'ID', key: 'teacherId' },
-        { title: 'Tên', key: 'name', sortable: true },
-        { title: 'Học hàm', key: 'academicRank' },
-        { title: 'Kinh nghiệm', key: 'experience', sortable: true },
-        { title: 'Khoa', key: 'facultyId' },
-        { title: 'SĐT', key: 'phoneNumber' },
-        { title: 'Email', key: 'email' },
-    ];
+const handleAdd = () => {
+        setEditingTeacher(null);
+        setModalError(null); // Reset lỗi modal
+        setIsModalOpen(true);
+    };
 
-    // Filter teachers based on search term and type
-    const filteredTeachers = teachers.filter(teacher => {
-        const lowerCaseSearchTerm = searchTerm.toLowerCase();
-        switch (searchType) {
-            case 'name':
-                return teacher.name.toLowerCase().includes(lowerCaseSearchTerm);
-            case 'email':
-                return teacher.email.toLowerCase().includes(lowerCaseSearchTerm);
-            case 'faculty':
-                return (faculties && getFacultyName(teacher.facultyId).props && getFacultyName(teacher.facultyId).props.children.toLowerCase().includes(lowerCaseSearchTerm));
-            default:
-                return (
-                    teacher.name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    teacher.email.toLowerCase().includes(lowerCaseSearchTerm) ||
-                    (faculties && getFacultyName(teacher.facultyId).props && getFacultyName(teacher.facultyId).props.children.toLowerCase().includes(lowerCaseSearchTerm))
-                );
-        }
-    });
+    const handleEdit = (teacher) => {
+        // Cần lấy teacher gốc chưa map tên khoa
+        const originalTeacher = teachers.find(t => t.teacherId === teacher.teacherId);
+        setEditingTeacher(originalTeacher || teacher); // Ưu tiên lấy teacher gốc
+        setModalError(null); // Reset lỗi modal
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this teacher?")) {
+            try {
+                // 4. Sửa URL
+                await axios.delete(`${API_URL}/teachers/${id}`);
+                fetchTeachers();
+                toast.success("Đã xóa giảng viên thành công!"); // Thêm toast success
+            } catch (error) {
+                console.error("Error deleting teacher:", error); // Thêm log chi tiết
+                const errorMessage = error.response?.data?.message || "Lỗi khi xóa giảng viên.";
+                toast.error(errorMessage);
+            }
+        }
+    };
+
+    const handleSave = async (teacherData) => {
+        try {
+            // Xóa bỏ validation client-side đơn giản vì backend đã làm tốt hơn
+            if (editingTeacher) {
+                // 5. Sửa URL
+                await axios.put(`${API_URL}/teachers/${editingTeacher.teacherId}`, teacherData);
+                toast.success("Cập nhật giảng viên thành công!");
+            } else {
+                // 6. Sửa URL
+                await axios.post(`${API_URL}/teachers`, teacherData);
+                toast.success("Thêm giảng viên mới thành công!");
+            }
+            fetchTeachers();
+            setIsModalOpen(false);
+            setModalError(null); // Xóa lỗi khi thành công
+        } catch (error) {
+            console.error("Error saving teacher:", error); // Thêm log chi tiết
+            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu giảng viên.";
+            setModalError(errorMessage); // Hiển thị lỗi trong modal
+            // Không dùng toast.error ở đây nữa
+        }
+    };
+const columns = [
+        { title: 'ID', key: 'teacherId' },
+        { title: 'Tên', key: 'name', sortable: true },
+        { title: 'Học hàm', key: 'academicRank' },
+        { title: 'Kinh nghiệm', key: 'experience', sortable: true },
+        { title: 'Khoa', key: 'facultyName', sortable: true }, // SỬA: Đổi key
+        { title: 'SĐT', key: 'phoneNumber' },
+        { title: 'Email', key: 'email' },
+    ];
+
+// SỬA: Filter teachers
+    const filteredTeachers = teachers.filter(teacher => {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const facultyName = getFacultyName(teacher.facultyId)?.toLowerCase() || ''; // Lấy text
+
+        switch (searchType) {
+            case 'name':
+                return teacher.name?.toLowerCase().includes(lowerCaseSearchTerm);
+            case 'email':
+                return teacher.email?.toLowerCase().includes(lowerCaseSearchTerm);
+            case 'faculty':
+                return facultyName.includes(lowerCaseSearchTerm); // Tìm trên text
+            default: // Tìm kiếm chung
+                return (
+                  (teacher.name?.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                  (teacher.email?.toLowerCase().includes(lowerCaseSearchTerm)) ||
+                  facultyName.includes(lowerCaseSearchTerm)
+                );
+        }
+    });
 
     // Get current teachers for pagination
     const indexOfLastTeacher = currentPage * itemsPerPage;
@@ -167,10 +182,15 @@ const Teachers = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     // Thêm tên khoa vào dữ liệu giảng viên
-    const teacherDataWithFaculty = currentTeachers.map((teacher) => ({
-        ...teacher,
-        facultyId: getFacultyName(teacher.facultyId),
-    }));
+const teacherDataWithFaculty = currentTeachers.map((teacher) => ({
+        ...teacher,
+        facultyName: getFacultyName(teacher.facultyId), // Giờ là text
+    }));
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setModalError(null); // Reset lỗi khi đóng
+    };
 
     return (
         <div className="page-container">
@@ -232,11 +252,12 @@ const Teachers = () => {
 
             <TeacherModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSave}
-                teacher={editingTeacher}
+                onClose={handleCloseModal} // Dùng hàm close mới
+                onSave={handleSave}
+                teacher={editingTeacher}
+                faculties={faculties} // Truyền faculties xuống modal
+                serverError={modalError} // Truyền lỗi modal
             />
-            <ToastContainer />
         </div>
     );
 };

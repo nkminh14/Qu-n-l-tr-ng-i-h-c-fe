@@ -6,6 +6,8 @@ import { Link } from "react-router-dom";
 import "./Tuition.css";
 import { toast } from "react-toastify";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 const Tuition = () => {
   const [tuitions, setTuitions] = useState([]);
   const [students, setStudents] = useState([]);
@@ -28,31 +30,34 @@ const Tuition = () => {
     fetchStudents();
   }, []);
 
-  const fetchTuitions = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/tuitions");
-      setTuitions(res.data || []);
-    } catch (err) {
-      toast.error("Không thể tải danh sách học phí!");
-    }
-  };
+const fetchTuitions = async () => {
+        try {
+            // 2. Sửa URL
+            const res = await axios.get(`${API_URL}/tuitions`);
+            setTuitions(res.data || []);
+        } catch (err) {
+            console.error("Không thể tải danh sách học phí:", err); // Thêm log
+            toast.error("Không thể tải danh sách học phí!");
+        }
+    };
 
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/students");
-      setStudents(res.data || []);
-    } catch (err) {
-      toast.error("Không thể tải danh sách sinh viên!");
-    }
-  };
+    const fetchStudents = async () => {
+        try {
+            // 3. Sửa URL
+            const res = await axios.get(`${API_URL}/students`);
+            setStudents(res.data || []);
+        } catch (err) {
+            console.error("Không thể tải danh sách sinh viên:", err); // Thêm log
+            toast.error("Không thể tải danh sách sinh viên!");
+        }
+    };
 
-  const getStudentLabel = (studentId, fallbackCode) => {
-    if (!students) return "Loading...";
-    const st = students.find((s) => s.studentId === studentId);
-    if (!st) return fallbackCode || "N/A";
-    return <Link to={`/students`}>{`${st.name} (${st.studentCode})`}</Link>;
-  };
-
+const getStudentLabel = (studentId, fallbackCode) => {
+        if (!students || students.length === 0) return fallbackCode || "Loading..."; // Check students array
+        const st = students.find((s) => s.studentId === studentId);
+        if (!st) return fallbackCode || "N/A";
+        return `${st.name} (${st.studentCode})`; // Trả về text
+    };
   const handleSort = (columnKey) => {
     const isAsc = sortColumn === columnKey && sortOrder === "asc";
     const newSortOrder = isAsc ? "desc" : "asc";
@@ -97,53 +102,54 @@ const Tuition = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (rowOrId) => {
-    const id = typeof rowOrId === "object" ? rowOrId.tuitionId : Number(rowOrId);
-    if (!id) return;
+const handleDelete = async (rowOrId) => {
+        const id = typeof rowOrId === "object" ? rowOrId.tuitionId : Number(rowOrId);
+        if (!id) return;
 
-    if (window.confirm("Bạn có chắc chắn muốn xóa học phí này không?")) {
-      try {
-        await axios.delete(`http://localhost:8080/tuitions/${id}`);
-        fetchTuitions();
-        toast.success("Xóa thành công!");
-      } catch (err) {
-        toast.error(err.response?.data?.message || "Lỗi khi xóa!");
-      }
-    }
-  };
+        if (window.confirm("Bạn có chắc chắn muốn xóa học phí này không?")) {
+            try {
+                // 4. Sửa URL
+                await axios.delete(`${API_URL}/tuitions/${id}`);
+                fetchTuitions();
+                toast.success("Xóa thành công!");
+            } catch (err) {
+                console.error("Lỗi khi xóa học phí:", err); // Thêm log
+                toast.error(err.response?.data?.message || "Lỗi khi xóa!");
+            }
+        }
+    };
 
-  const handleSave = async (tuitionData) => {
-    try {
-      if (editingTuition) {
-        await axios.put(
-          `http://localhost:8080/tuitions/${editingTuition.tuitionId}`,
-          tuitionData
-        );
-        toast.success("Cập nhật thành công!");
-      } else {
-        await axios.post("http://localhost:8080/tuitions", tuitionData);
-        toast.success("Thêm thành công!");
-      }
-      fetchTuitions();
-      setIsModalOpen(false);
-      setModalError(null);
-    } catch (err) {
-      setModalError(err.response?.data?.message || "Lỗi hệ thống!");
-    }
-  };
+    const handleSave = async (tuitionData) => {
+        try {
+            if (editingTuition) {
+                // 5. Sửa URL
+                await axios.put(`${API_URL}/tuitions/${editingTuition.tuitionId}`, tuitionData);
+                toast.success("Cập nhật thành công!");
+            } else {
+                // 6. Sửa URL
+                await axios.post(`${API_URL}/tuitions`, tuitionData);
+                toast.success("Thêm thành công!");
+            }
+            fetchTuitions();
+            setIsModalOpen(false);
+            setModalError(null);
+        } catch (err) {
+            console.error("Lỗi khi lưu học phí:", err); // Thêm log
+            setModalError(err.response?.data?.message || "Lỗi hệ thống!");
+        }
+    };
 
   // === Cột hiển thị ===
-  const columns = [
-    { title: "ID", key: "tuitionId", sortable: true },
-    { title: "Sinh viên", key: "student", sortable: false },
-    { title: "Mã SV", key: "studentCode", sortable: true },
-    { title: "Học kỳ", key: "semester", sortable: true },
-    { title: "Số tiền", key: "amount", sortable: true },
-    { title: "Ngày bắt đầu", key: "startDate", sortable: true },
-    { title: "Ngày kết thúc", key: "endDate", sortable: true },
-    { title: "Trạng thái", key: "status", sortable: true },
-  ];
-
+const columns = [
+        { title: "ID", key: "tuitionId", sortable: true },
+        { title: "Sinh viên", key: "studentName", sortable: false }, // SỬA: Đổi key
+        { title: "Mã SV", key: "studentCode", sortable: true },
+        { title: "Học kỳ", key: "semester", sortable: true },
+        { title: "Số tiền", key: "amount", sortable: true },
+        { title: "Ngày bắt đầu", key: "startDate", sortable: true },
+        { title: "Ngày kết thúc", key: "endDate", sortable: true },
+        { title: "Trạng thái", key: "status", sortable: true },
+    ];
   const filteredTuitions = tuitions.filter((t) => {
     const q = (searchTerm || "").toLowerCase();
     switch (searchType) {
@@ -165,15 +171,16 @@ const Tuition = () => {
   const currentList = filteredTuitions.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredTuitions.length / itemsPerPage);
 
-  const dataWithStudent = currentList.map((t) => {
-    return {
-      ...t,
-      __raw: t,
-      student: getStudentLabel(t.studentId, t.studentCode),
-      startDate: t.startDate,
-      endDate: t.endDate,
-    };
-  });
+const dataWithStudent = currentList.map((t) => {
+        return {
+            ...t,
+            __raw: t, // Giữ lại object gốc để Edit
+            studentName: getStudentLabel(t.studentId, t.studentCode), // Giờ là text
+          // Các trường ngày tháng giữ nguyên định dạng ISO để sort, format khi render
+            startDate: t.startDate,
+            endDate: t.endDate,
+        };
+    });
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

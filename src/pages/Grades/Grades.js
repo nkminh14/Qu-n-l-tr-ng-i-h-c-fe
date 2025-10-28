@@ -1,8 +1,10 @@
 import React, { use, useEffect, useState } from "react";
 import axios from "axios";
-
+import { toast } from 'react-toastify';
 import Table from "../../components/Table/Table";
 import GradeModal from "./GradeModal";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 const Grades = () => {
     const [grades, setGrades] = useState([]);
@@ -18,19 +20,21 @@ const Grades = () => {
         fetchGrades();
     }, []);
 
-    const fetchGrades = async () => {
-        try {
-            setLoading(true);
-            setError("");
-            const res = await axios.get("http://localhost:8080/grades");
-            setGrades(res.data || []);
-        } catch (err) {
-            console.error("Lỗi khi lấy danh sách điểm:", err);
-            setError("Không thể tải danh sách điểm.");
-        } finally {
-            setLoading(false);
-        }
-    };
+ const fetchGrades = async () => {
+        try {
+            setLoading(true);
+            setError("");
+            // 4. Sửa URL
+            const res = await axios.get(`${API_URL}/grades`); // Thay đổi URL
+            setGrades(res.data || []);
+        } catch (err) {
+            console.error("Lỗi khi lấy danh sách điểm:", err);
+            setError("Không thể tải danh sách điểm."); // Giữ lại lỗi tải trang
+            toast.error("Không thể tải danh sách điểm."); // Thêm toast
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSort = (key) => {
         const sorted = [...grades].sort((a, b) => {
@@ -46,40 +50,56 @@ const Grades = () => {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
-    const handleAdd = () => {
-        setEditingGrade(null);
-        setIsModalOpen(true);
-    };
+const handleAdd = () => {
+        setEditingGrade(null);
+        setModalError(null); 
+        setIsModalOpen(true);
+    };
 
-    const handleEdit = (grade) => {
-        setEditingGrade(grade);
-        setIsModalOpen(true);
-    };
+    const handleEdit = (grade) => {
+        setEditingGrade(grade);
+        setModalError(null); 
+        setIsModalOpen(true);
+    };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa điểm này không?")) {
-            try {
-                await axios.delete(`http://localhost:8080/grades/${id}`);
-                fetchGrades();
-            } catch (error) {
-                console.error("Lỗi khi xóa điểm:", error);
-            }
-        }
-    };
+const handleDelete = async (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa điểm này không?")) {
+            try {
+                // 7. Sửa URL
+                await axios.delete(`${API_URL}/grades/${id}`); // Thay đổi URL
+                fetchGrades();
+                toast.success("Đã xóa điểm thành công!"); // <-- 8. THÊM TOAST THÀNH CÔNG
+            } catch (error) {
+                console.error("Lỗi khi xóa điểm:", error);
+                // 9. THÊM TOAST LỖI
+                const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi xóa.";
+                toast.error(errorMessage);
+            }
+        }
+    };
 
-    const handleSave = async (gradeData) => {
-        try {
-            if (editingGrade) {
-                await axios.put(`http://localhost:8080/grades/${editingGrade.gradeId}`, gradeData);
-            } else {
-                await axios.post("http://localhost:8080/grades", gradeData);
-            }
-            fetchGrades();
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error("Lỗi khi lưu điểm:", error);
-        }
-    };
+    const handleSave = async (gradeData) => {
+        try {
+            if (editingGrade) {
+                // 10. Sửa URL
+                await axios.put(`${API_URL}/grades/${editingGrade.gradeId}`, gradeData); // Thay đổi URL
+                toast.success("Cập nhật điểm thành công!"); // <-- 11. THÊM TOAST THÀNH CÔNG
+            } else {
+                // 12. Sửa URL
+                await axios.post(`${API_URL}/grades`, gradeData); // Thay đổi URL
+                toast.success("Thêm điểm mới thành công!"); // <-- 13. THÊM TOAST THÀNH CÔNG
+            }
+            fetchGrades();
+            setIsModalOpen(false);
+            setModalError(null); // Xóa lỗi cũ khi thành công
+        } catch (error) {
+            console.error("Lỗi khi lưu điểm:", error);
+            // 14. DÙNG MODAL ERROR
+            const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi lưu.";
+            setModalError(errorMessage);
+            // Không đóng modal khi lỗi
+        }
+    };
 
     const columns = [
         { title: "Mã điểm", key: "gradeId" },
@@ -90,9 +110,14 @@ const Grades = () => {
         { title: "Điểm cuối kỳ", key: "finalScore" },
     ];
 
+const handleCloseModal = () => {
+      setIsModalOpen(false);
+      setModalError(null); 
+    };
+
     return (
         <div style={{ padding: "40px", textAlign: "center" }}>
-            <h2> Trang Quản lý Điểm Sinh viên</h2>
+            <h2>Trang Quản lý Điểm Sinh viên</h2>
 
             <div className="search-pagination-controls">    
                 <div className="search-input-wrapper">
@@ -125,22 +150,28 @@ const Grades = () => {
                 <Table
                     columns={columns}
                     data={grades
-                        .filter(grade => {
-                            const lowerCaseSearchTerm = searchTerm.toLowerCase();
-                            let match = true;
-
-                            if (searchType === "studentCode") {
-                                const studentCode = String(grade.studentCode || "");
-                                match = studentCode.toLowerCase().includes(lowerCaseSearchTerm);
-                            } else if (searchType === "classId") {
-                                const classId = String(grade.classId || "");
-                                match = classId.toLowerCase().includes(lowerCaseSearchTerm);
-                            }
-
-                            return match;
-                        }) 
-                        .map(g => ({...g, studentCode: g.studentCode ?? "N/A", classId: g.classId ?? "N/A", attendanceScore: g.attendanceScore ?? "-", midtermScore: g.midtermScore ?? "-", finalScore: g.finalScore ?? "-"}))
-                    }
+                        .filter(grade => {
+                            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+                            let match = true;
+                            if (searchType === "studentCode") {
+                                const studentCode = String(grade.student?.studentCode || grade.studentCode || ""); // Lấy studentCode đúng cách
+                                match = studentCode.toLowerCase().includes(lowerCaseSearchTerm);
+                            } else if (searchType === "classId") {
+                                const classId = String(grade.aClass?.classId || grade.classId || ""); // Lấy classId đúng cách
+                                match = classId.includes(lowerCaseSearchTerm); // ID không cần toLowerCase
+                            }
+                            return match;
+                        })
+                        // Map lại data để hiển thị đúng và xử lý null
+                        .map(g => ({
+                            ...g,
+                            studentCode: g.student?.studentCode || g.studentCode || "N/A", // Lấy mã SV
+                            classId: g.aClass?.classId || g.classId || "N/A", // Lấy mã lớp
+                            attendanceScore: g.attendanceScore ?? "-",
+                            midtermScore: g.midtermScore ?? "-",
+                            finalScore: g.finalScore ?? "-"
+                        }))
+                    }
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onSort={handleSort}
@@ -150,9 +181,10 @@ const Grades = () => {
 
             <GradeModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSave={handleSave}
-                grade={editingGrade}
+                onClose={handleCloseModal} 
+                onSave={handleSave}
+                grade={editingGrade}
+                serverError={modalError}
             />
         </div>
     );
